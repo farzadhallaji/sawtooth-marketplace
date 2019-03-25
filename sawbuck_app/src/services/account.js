@@ -37,19 +37,19 @@ const getUserAccount = () => {
 }
 
 /**
- * Returns an object with each asset an account has holdings of as the keys
- * the largest quantity of those holdings as the value.
+ * Returns an object with each resource an account has assets of as the keys
+ * the largest quantity of those assets as the value.
  */
-const getAssetQuantities = account => {
-  return account.holdings
-    .reduce((quantities, { asset, quantity }) => {
-      if (!quantities[asset]) quantities[asset] = quantity
-      else quantities[asset] = Math.max(quantities[asset], quantity)
+const getResourceQuantities = account => {
+  return account.assets
+    .reduce((quantities, { resource, quantity }) => {
+      if (!quantities[resource]) quantities[resource] = quantity
+      else quantities[resource] = Math.max(quantities[resource], quantity)
       return quantities
     }, {})
 }
 
 module.exports = {
   getUserAccount,
-  getAssetQuantities
+  getResourceQuantities
 }

@@ -35,41 +35,41 @@ const offerButton = (name, disabled, key = 'source') => {
            label)
 }
 
-const assetRowMapper = account => asset => {
-  const safeName = window.encodeURI(asset.name)
+const resourceRowMapper = account => resource => {
+  const safeName = window.encodeURI(resource.name)
   const offerDisabled = !account ||
-    !account.quantities[asset.name] ||
-    (asset.rules.find(({ type }) => type === 'NOT_TRANSFERABLE') &&
-      !asset.owners.find(owner => owner === account.publicKey))
+    !account.quantities[resource.name] ||
+    (resource.rules.find(({ type }) => type === 'NOT_TRANSFERABLE') &&
+      !resource.owners.find(owner => owner === account.publicKey))
   const requestDisabled = !account
 
   return m('.row.mb-5', [
     m('.col-md-8', [
       layout.row(m('a.h5', {
-        href: `/assets/${safeName}`,
+        href: `/resources/${safeName}`,
         oncreate: m.route.link
-      }, asset.name)),
-      layout.row(m('.text-muted', asset.description))
+      }, resource.name)),
+      layout.row(m('.text-muted', resource.description))
     ]),
     m('.col-md-4.mt-3', [
-      offerButton(asset.name, offerDisabled),
-      offerButton(asset.name, requestDisabled, 'target')
+      offerButton(resource.name, offerDisabled),
+      offerButton(resource.name, requestDisabled, 'target')
     ])
   ])
 }
 
 /**
- * A page displaying each Asset, with links to create an Offer,
+ * A page displaying each Resource, with links to create an Offer,
  * or to view more detail.
  */
-const AssetListPage = {
+const ResourceListPage = {
   oninit (vnode) {
-    Promise.all([ acct.getUserAccount(), api.get(`assets`) ])
-      .then(([ account, assets ]) => {
-        vnode.state.assets = assets
+    Promise.all([ acct.getUserAccount(), api.get(`resources`) ])
+      .then(([ account, resources ]) => {
+        vnode.state.resources = resources
 
         if (account) {
-          const quantities = acct.getAssetQuantities(account)
+          const quantities = acct.getResourceQuantities(account)
           vnode.state.account = _.assign({ quantities }, account)
         }
       })
@@ -77,17 +77,17 @@ const AssetListPage = {
   },
 
   view (vnode) {
-    const assets = _.get(vnode.state, 'assets', [])
+    const resources = _.get(vnode.state, 'resources', [])
 
     return [
-      layout.title('Assets Available'),
+      layout.title('Resources Available'),
       m('.container.mt-6',
-        assets.length > 0
-          ? assets.map(assetRowMapper(vnode.state.account))
+        resources.length > 0
+          ? resources.map(resourceRowMapper(vnode.state.account))
           : m('.text-center',
-              m('em', 'there are currently no available assets')))
+              m('em', 'there are currently no available resources')))
     ]
   }
 }
 
-module.exports = AssetListPage
+module.exports = ResourceListPage

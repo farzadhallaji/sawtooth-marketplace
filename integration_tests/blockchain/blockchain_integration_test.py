@@ -95,17 +95,17 @@ class BlockchainTest(unittest.TestCase):
                 description=uuid4().hex)[0]['status'],
             "COMMITTED")
 
-    def test_01_create_asset(self):
-        """Tests the CreateAsset validation rules
+    def test_01_create_resource(self):
+        """Tests the CreateResource validation rules
 
         Notes:
-            CreateAsset validation rules
+            CreateResource validation rules
                 - The Txn signer has an account
-                - There is not already an Asset with the same name.
+                - There is not already an Resource with the same name.
         """
 
         self.assertEqual(
-            self.client.create_asset(
+            self.client.create_resource(
                 key=self.signer1,
                 name=self.sawbucks,
                 description=uuid4().hex,
@@ -113,17 +113,17 @@ class BlockchainTest(unittest.TestCase):
             "COMMITTED")
 
         self.assertEqual(
-            self.client.create_asset(
+            self.client.create_resource(
                 key=self.signer1,
                 name=self.sawbucks,
                 description=uuid4().hex,
                 rules=[])[0]['status'],
             "INVALID",
-            "There must not be another Asset with the same name")
+            "There must not be another Resource with the same name")
 
         invalid_signer = make_key()
         self.assertEqual(
-            self.client.create_asset(
+            self.client.create_resource(
                 key=invalid_signer,
                 name=uuid4().hex,
                 description=uuid4().hex,
@@ -132,120 +132,120 @@ class BlockchainTest(unittest.TestCase):
             "The txn signer must have an account.")
 
         self.assertEqual(
-            self.client.create_asset(
+            self.client.create_resource(
                 key=self.signer2,
                 name=self.pickles,
                 description=uuid4().hex,
                 rules=[])[0]['status'],
             "COMMITTED")
 
-    def test_02_create_holding(self):
-        """Tests the CreateHolding validation rules.
+    def test_02_create_asset(self):
+        """Tests the CreateAsset validation rules.
 
         Notes:
-            CreateHolding validation rules
-                - The Holding id must not already belong to a holding.
+            CreateAsset validation rules
+                - The Asset id must not already belong to a asset.
                 - The txn signer must own an Account.
-                - The asset must exist.
+                - The resource must exist.
                 - If the quantity is not 0, then the txn signer must
-                  be an owner of the asset.
+                  be an owner of the resource.
         """
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer1,
                 identifier=self.signer1_sawbucks,
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=2)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer1,
                 identifier=self.signer1_sawbucks,
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=3)[0]['status'],
             "INVALID",
-            "The Holding Id must not already belong to a holding.")
+            "The Asset Id must not already belong to a asset.")
 
         no_account = make_key()
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=no_account,
                 identifier=str(uuid4()),
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=2)[0]['status'],
             "INVALID",
             "The Account must exist.")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer2,
                 identifier=str(uuid4()),
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=2)[0]['status'],
             "INVALID",
             "The account must be owned by the txn signer.")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer1,
                 identifier=str(uuid4()),
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=uuid4().hex,
+                resource=uuid4().hex,
                 quantity=3)[0]['status'],
             "INVALID",
-            "The Asset/holding must exist")
+            "The Resource/asset must exist")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer2,
                 identifier=str(uuid4()),
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=2)[0]['status'],
             "INVALID",
-            "The asset/holding must be owned by the txn signer if the "
-            "quantity of the Holding is not zero.")
+            "The resource/asset must be owned by the txn signer if the "
+            "quantity of the Asset is not zero.")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer2,
                 identifier=self.signer2_sawbucks,
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.sawbucks,
+                resource=self.sawbucks,
                 quantity=0)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer1,
                 identifier=self.signer1_pickles,
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.pickles,
+                resource=self.pickles,
                 quantity=0)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
-            self.client.create_holding(
+            self.client.create_asset(
                 key=self.signer2,
                 identifier=self.signer2_pickles,
                 label=uuid4().hex,
                 description=uuid4().hex,
-                asset=self.pickles,
+                resource=self.pickles,
                 quantity=10)[0]['status'],
             "COMMITTED")
 
@@ -259,20 +259,20 @@ class BlockchainTest(unittest.TestCase):
                 - The source is set.
                 - The source_quantity is not 0.
                 - The target or target_quantity must be both set or both unset.
-                - The source is a Holding.
-                - The target is a Holding.
-                - The txn signer must be the account holder of both Holdings.
+                - The source is a Asset.
+                - The target is a Asset.
+                - The txn signer must be the account holder of both Assets.
         """
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_sawbucks,
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_sawbucks,
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_pickles,
+        target = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_pickles,
             quantity=1,
-            asset=self.pickles)
+            resource=self.pickles)
 
         self.assertEqual(
             self.client.create_offer(
@@ -311,10 +311,10 @@ class BlockchainTest(unittest.TestCase):
             "INVALID",
             "The Transaction signer must have an Account")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id='',
+        source = transaction_creation.MarketplaceAsset(
+            asset_id='',
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
         self.assertEqual(
             self.client.create_offer(
@@ -328,10 +328,10 @@ class BlockchainTest(unittest.TestCase):
             "INVALID",
             "The Source must be set.")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_sawbucks,
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_sawbucks,
             quantity=None,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
         self.assertEqual(
             self.client.create_offer(
@@ -345,15 +345,15 @@ class BlockchainTest(unittest.TestCase):
             "INVALID",
             "The source quantity must be set and non-zero.")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_sawbucks,
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_sawbucks,
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_pickles,
+        target = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_pickles,
             quantity=None,
-            asset=self.pickles)
+            resource=self.pickles)
 
         self.assertEqual(
             self.client.create_offer(
@@ -367,10 +367,10 @@ class BlockchainTest(unittest.TestCase):
             "INVALID",
             "The target and target_quantity must be both set or unset.")
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id='',
+        target = transaction_creation.MarketplaceAsset(
+            asset_id='',
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
         self.assertEqual(
             self.client.create_offer(
@@ -384,15 +384,15 @@ class BlockchainTest(unittest.TestCase):
             "INVALID",
             "The target and target_quantity must be both set or unset.")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=str(uuid4()),
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=str(uuid4()),
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_pickles,
+        target = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_pickles,
             quantity=1,
-            asset=self.pickles)
+            resource=self.pickles)
 
         self.assertEqual(
             self.client.create_offer(
@@ -404,17 +404,17 @@ class BlockchainTest(unittest.TestCase):
                 target=target,
                 rules=[])[0]['status'],
             "INVALID",
-            "The Source must be a Holding.")
+            "The Source must be a Asset.")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_sawbucks,
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_sawbucks,
             quantity=1,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id=str(uuid4()),
+        target = transaction_creation.MarketplaceAsset(
+            asset_id=str(uuid4()),
             quantity=1,
-            asset=self.pickles)
+            resource=self.pickles)
 
         self.assertEqual(
             self.client.create_offer(
@@ -426,17 +426,17 @@ class BlockchainTest(unittest.TestCase):
                 target=target,
                 rules=[])[0]['status'],
             "INVALID",
-            "The target must be a Holding.")
+            "The target must be a Asset.")
 
-        source = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer1_sawbucks,
+        source = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer1_sawbucks,
             quantity=10,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
-        target = transaction_creation.MarketplaceHolding(
-            holding_id=self.signer2_sawbucks,
+        target = transaction_creation.MarketplaceAsset(
+            asset_id=self.signer2_sawbucks,
             quantity=11,
-            asset=self.sawbucks)
+            resource=self.sawbucks)
 
         self.assertEqual(
             self.client.create_offer(
@@ -449,7 +449,7 @@ class BlockchainTest(unittest.TestCase):
                 rules=[])[0]['status'],
             "INVALID",
             "The txn signer must be the account holder for both source and "
-            "target Holdings.")
+            "target Assets.")
 
     def test_04_accept_offer(self):
         """Tests the AcceptOffer validation rules.
@@ -457,25 +457,25 @@ class BlockchainTest(unittest.TestCase):
         Notes
             AcceptOffer
                 - The Offer exists and is Open.
-                - The Source Holding has enough Quantity for the transaction.
-                - The Receiver Source Holding exists and has enough
+                - The Source Asset has enough Quantity for the transaction.
+                - The Receiver Source Asset exists and has enough
                   Quantity for the transaction.
-                - The Source Holding and Receiver Target Holding are of the
-                  same asset.
-                - The Target Holding and Receiver Source Holding are of the
-                  same asset.
+                - The Source Asset and Receiver Target Asset are of the
+                  same resource.
+                - The Target Asset and Receiver Source Asset are of the
+                  same resource.
         """
 
         offerer = transaction_creation.OfferParticipant(
             source=self.signer1_sawbucks,
-            source_asset=self.sawbucks,
+            source_resource=self.sawbucks,
             target=self.signer1_pickles,
-            target_asset=self.pickles)
+            target_resource=self.pickles)
         receiver = transaction_creation.OfferParticipant(
             source=self.signer2_pickles,
-            source_asset=self.pickles,
+            source_resource=self.pickles,
             target=self.signer2_sawbucks,
-            target_asset=self.sawbucks)
+            target_resource=self.sawbucks)
 
         self.assertEqual(
             self.client.accept_offer(
@@ -559,8 +559,8 @@ class MarketplaceClient(object):
         self._client.send_batches(batch_list)
         return self._client.get_statuses([signature], wait=10)
 
-    def create_asset(self, key, name, description, rules):
-        batches, signature = transaction_creation.create_asset(
+    def create_resource(self, key, name, description, rules):
+        batches, signature = transaction_creation.create_resource(
             txn_key=key,
             batch_key=BATCH_KEY,
             name=name,
@@ -570,20 +570,20 @@ class MarketplaceClient(object):
         self._client.send_batches(batch_list)
         return self._client.get_statuses([signature], wait=10)
 
-    def create_holding(self,
+    def create_asset(self,
                        key,
                        identifier,
                        label,
                        description,
-                       asset,
+                       resource,
                        quantity):
-        batches, signature = transaction_creation.create_holding(
+        batches, signature = transaction_creation.create_asset(
             txn_key=key,
             batch_key=BATCH_KEY,
             identifier=identifier,
             label=label,
             description=description,
-            asset=asset,
+            resource=resource,
             quantity=quantity)
         batch_list = batch_pb2.BatchList(batches=batches)
         self._client.send_batches(batch_list)

@@ -25,7 +25,7 @@ from api import messaging
 from api.errors import ApiBadRequest
 
 from db import offers_query
-from db.common import fetch_holdings
+from db.common import fetch_assets
 
 from marketplace_transaction import transaction_creation
 
@@ -45,10 +45,10 @@ async def create_offer(request):
     await asyncio.sleep(2.0)  # Mitigate race condition
     offer = _create_offer_dict(request.json, signer.get_public_key().as_hex())
 
-    offer_holdings = await _create_holdings_dict(
+    offer_assets = await _create_assets_dict(
         request.app.config.DB_CONN, offer)
 
-    source, target = _create_marketplace_holdings(offer, offer_holdings)
+    source, target = _create_marketplace_assets(offer, offer_assets)
 
     batches, batch_id = transaction_creation.create_offer(
         txn_key=signer,
@@ -103,11 +103,11 @@ async def accept_offer(request, offer_id):
     offer = await offers_query.fetch_offer_resource(
         request.app.config.DB_CONN, offer_id)
 
-    offer_holdings = await _create_holdings_dict(
+    offer_assets = await _create_assets_dict(
         request.app.config.DB_CONN, offer)
 
     offerer, receiver = _create_offer_participants(
-        request.json, offer, offer_holdings)
+        request.json, offer, offer_assets)
 
     signer = await common.get_signer(request)
     batches, batch_id = transaction_creation.accept_offer(
@@ -148,57 +148,57 @@ async def close_offer(request, offer_id):
     return response.json('')
 
 
-def _create_marketplace_holdings(offer, offer_holdings):
-    source = transaction_creation.MarketplaceHolding(
-        holding_id=offer['source'],
+def _create_marketplace_assets(offer, offer_assets):
+    source = transaction_creation.MarketplaceAsset(
+        asset_id=offer['source'],
         quantity=offer['sourceQuantity'],
-        asset=offer_holdings['source']['asset'])
+        resource=offer_assets['source']['resource'])
 
     if offer.get('target'):
-        target_asset = offer_holdings['target']['asset']
+        target_resource = offer_assets['target']['resource']
     else:
-        target_asset = None
-    target = transaction_creation.MarketplaceHolding(
-        holding_id=offer.get('target'),
+        target_resource = None
+    target = transaction_creation.MarketplaceAsset(
+        asset_id=offer.get('target'),
         quantity=offer.get('targetQuantity'),
-        asset=target_asset)
+        resource=target_resource)
 
     return (source, target)
 
 
-def _create_offer_participants(body, offer, offer_holdings):
-    input_asset = offer_holdings['source']['asset']
+def _create_offer_participants(body, offer, offer_assets):
+    input_resource = offer_assets['source']['resource']
     if offer.get('target'):
-        output_asset = offer_holdings['target']['asset']
+        output_resource = offer_assets['target']['resource']
     else:
-        output_asset = None
+        output_resource = None
 
     offerer = transaction_creation.OfferParticipant(
         source=offer['source'],
         target=offer.get('target'),
-        source_asset=input_asset,
-        target_asset=output_asset)
+        source_resource=input_resource,
+        target_resource=output_resource)
 
     receiver = transaction_creation.OfferParticipant(
         source=body.get('source'),
         target=body['target'],
-        source_asset=output_asset,
-        target_asset=input_asset)
+        source_resource=output_resource,
+        target_resource=input_resource)
 
     return (offerer, receiver)
 
 
-async def _create_holdings_dict(conn, holding_ids):
+async def _create_assets_dict(conn, asset_ids):
     keys = ['source', 'target']
-    holdings = await fetch_holdings([
-        holding_ids.get(k) for k in keys if holding_ids.get(k) is not None
+    assets = await fetch_assets([
+        asset_ids.get(k) for k in keys if asset_ids.get(k) is not None
     ]).run(conn)
 
-    holdings_dict = {
-        k: h for h in holdings for k in keys if holding_ids.get(k) == h['id']
+    assets_dict = {
+        k: h for h in assets for k in keys if asset_ids.get(k) == h['id']
     }
 
-    return holdings_dict
+    return assets_dict
 
 
 def _create_offer_dict(body, public_key):

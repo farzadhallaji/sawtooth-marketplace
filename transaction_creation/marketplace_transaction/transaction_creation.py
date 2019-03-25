@@ -53,35 +53,35 @@ def create_account(txn_key, batch_key, label, description):
         batch_key=batch_key)
 
 
-def create_asset(txn_key, batch_key, name, description, rules):
-    """Create a CreateAsset txn and wrap it in a batch and list.
+def create_resource(txn_key, batch_key, name, description, rules):
+    """Create a CreateResource txn and wrap it in a batch and list.
 
     Args:
         txn_key (sawtooth_signing.Signer): The txn signer key pair.
         batch_key (sawtooth_signing.Signer): The batch signer key pair.
-        name (str): The name of the asset.
-        description (str): A description of the asset.
+        name (str): The name of the resource.
+        description (str): A description of the resource.
         rules (list): List of protobuf.rule_pb2.Rule
 
     Returns:
         tuple: List of Batch, signature tuple
     """
 
-    inputs = [addresser.make_asset_address(asset_id=name),
+    inputs = [addresser.make_resource_address(resource_id=name),
               addresser.make_account_address(
                   account_id=txn_key.get_public_key().as_hex())]
 
-    outputs = [addresser.make_asset_address(asset_id=name)]
+    outputs = [addresser.make_resource_address(resource_id=name)]
 
-    asset = payload_pb2.CreateAsset(
+    resource = payload_pb2.CreateResource(
         name=name,
         description=description,
         rules=rules
     )
 
     payload = payload_pb2.TransactionPayload(
-        payload_type=payload_pb2.TransactionPayload.CREATE_ASSET,
-        create_asset=asset)
+        payload_type=payload_pb2.TransactionPayload.CREATE_RESOURCE,
+        create_resource=resource)
 
     return make_header_and_batch(
         payload=payload,
@@ -91,22 +91,22 @@ def create_asset(txn_key, batch_key, name, description, rules):
         batch_key=batch_key)
 
 
-def create_holding(txn_key,
+def create_asset(txn_key,
                    batch_key,
                    identifier,
                    label,
                    description,
-                   asset,
+                   resource,
                    quantity):
-    """Create a CreateHolding txn and wrap it in a batch and list.
+    """Create a CreateAsset txn and wrap it in a batch and list.
 
     Args:
         txn_key (sawtooth_signing.Signer): The txn signer key pair.
         batch_key (sawtooth_signing.Signer): The batch signer key pair.
-        identifier (str): The identifier of the Holding.
-        label (str): The label of the Holding.
-        description (str): The description of the Holding.
-        quantity (int): The amount of the Asset.
+        identifier (str): The identifier of the Asset.
+        label (str): The label of the Asset.
+        description (str): The description of the Asset.
+        quantity (int): The amount of the Resource.
 
     Returns:
         tuple: List of Batch, signature tuple
@@ -115,24 +115,24 @@ def create_holding(txn_key,
     inputs = [
         addresser.make_account_address(
             account_id=txn_key.get_public_key().as_hex()),
-        addresser.make_asset_address(asset_id=asset),
-        addresser.make_holding_address(holding_id=identifier)
+        addresser.make_resource_address(resource_id=resource),
+        addresser.make_asset_address(asset_id=identifier)
     ]
 
-    outputs = [addresser.make_holding_address(holding_id=identifier),
+    outputs = [addresser.make_asset_address(asset_id=identifier),
                addresser.make_account_address(
                    account_id=txn_key.get_public_key().as_hex())]
 
-    holding_txn = payload_pb2.CreateHolding(
+    asset_txn = payload_pb2.CreateAsset(
         id=identifier,
         label=label,
         description=description,
-        asset=asset,
+        resource=resource,
         quantity=quantity)
 
     payload = payload_pb2.TransactionPayload(
-        payload_type=payload_pb2.TransactionPayload.CREATE_HOLDING,
-        create_holding=holding_txn)
+        payload_type=payload_pb2.TransactionPayload.CREATE_ASSET,
+        create_asset=asset_txn)
 
     return make_header_and_batch(
         payload=payload,
@@ -158,9 +158,9 @@ def create_offer(txn_key,
         identifier (str): The identifier of the Offer.
         label (str): The offer's label.
         description (str): The description of the offer.
-        source (MarketplaceHolding): The holding id, quantity, asset to be
+        source (MarketplaceAsset): The asset id, quantity, resource to be
             drawn from.
-        target (MarketplaceHolding): The holding id, quantity, asset to be
+        target (MarketplaceAsset): The asset id, quantity, resource to be
             paid into.
         rules (list): List of protobuf.rule_pb2.Rule
 
@@ -172,15 +172,15 @@ def create_offer(txn_key,
     inputs = [
         addresser.make_account_address(
             account_id=txn_key.get_public_key().as_hex()),
-        addresser.make_holding_address(
-            holding_id=source.holding_id),
+        addresser.make_asset_address(
+            asset_id=source.asset_id),
         addresser.make_offer_address(offer_id=identifier),
-        addresser.make_asset_address(asset_id=source.asset)
+        addresser.make_resource_address(resource_id=source.resource)
     ]
-    if target.holding_id:
-        inputs.append(addresser.make_holding_address(
-            holding_id=target.holding_id))
-        inputs.append(addresser.make_asset_address(target.asset))
+    if target.asset_id:
+        inputs.append(addresser.make_asset_address(
+            asset_id=target.asset_id))
+        inputs.append(addresser.make_resource_address(target.resource))
 
     outputs = [addresser.make_offer_address(offer_id=identifier)]
 
@@ -188,9 +188,9 @@ def create_offer(txn_key,
         id=identifier,
         label=label,
         description=description,
-        source=source.holding_id,
+        source=source.asset_id,
         source_quantity=source.quantity,
-        target=target.holding_id,
+        target=target.asset_id,
         target_quantity=target.quantity,
         rules=rules)
 
@@ -227,32 +227,32 @@ def accept_offer(txn_key,
         tuple: List of Batch, signature tuple
     """
 
-    inputs = [addresser.make_holding_address(receiver.target),
-              addresser.make_holding_address(offerer.source),
-              addresser.make_asset_address(receiver.target_asset),
-              addresser.make_asset_address(offerer.source_asset),
+    inputs = [addresser.make_asset_address(receiver.target),
+              addresser.make_asset_address(offerer.source),
+              addresser.make_resource_address(receiver.target_resource),
+              addresser.make_resource_address(offerer.source_resource),
               addresser.make_offer_history_address(offer_id=identifier),
               addresser.make_offer_account_address(
                   offer_id=identifier,
                   account=txn_key.get_public_key().as_hex()),
               addresser.make_offer_address(identifier)]
 
-    outputs = [addresser.make_holding_address(receiver.target),
-               addresser.make_holding_address(offerer.source),
+    outputs = [addresser.make_asset_address(receiver.target),
+               addresser.make_asset_address(offerer.source),
                addresser.make_offer_history_address(offer_id=identifier),
                addresser.make_offer_account_address(
                    offer_id=identifier,
                    account=txn_key.get_public_key().as_hex())]
 
     if receiver.source is not None:
-        inputs.append(addresser.make_holding_address(receiver.source))
-        inputs.append(addresser.make_asset_address(receiver.source_asset))
-        outputs.append(addresser.make_holding_address(receiver.source))
+        inputs.append(addresser.make_asset_address(receiver.source))
+        inputs.append(addresser.make_resource_address(receiver.source_resource))
+        outputs.append(addresser.make_asset_address(receiver.source))
 
     if offerer.target is not None:
-        inputs.append(addresser.make_holding_address(offerer.target))
-        inputs.append(addresser.make_asset_address(offerer.target_asset))
-        outputs.append(addresser.make_holding_address(offerer.target))
+        inputs.append(addresser.make_asset_address(offerer.target))
+        inputs.append(addresser.make_resource_address(offerer.target_resource))
+        outputs.append(addresser.make_asset_address(offerer.target))
 
     accept_txn = payload_pb2.AcceptOffer(
         id=identifier,
@@ -304,54 +304,54 @@ def close_offer(txn_key, batch_key, identifier):
 
 class OfferParticipant(object):
 
-    def __init__(self, source, target, source_asset, target_asset):
+    def __init__(self, source, target, source_resource, target_resource):
         """Constructor
 
         Args:
-            source (str): The id of the source Holding.
-            target (str): The id of the target Holding.
-            source_asset (str): The id of the source Asset.
-            target_asset (str): The id of the target Asset.
+            source (str): The id of the source Asset.
+            target (str): The id of the target Asset.
+            source_resource (str): The id of the source Resource.
+            target_resource (str): The id of the target Resource.
         """
 
         self._source = source
-        self._source_asset = source_asset
+        self._source_resource = source_resource
 
         self._target = target
-        self._target_asset = target_asset
+        self._target_resource = target_resource
 
     @property
     def source(self):
         return self._source
 
     @property
-    def source_asset(self):
-        return self._source_asset
+    def source_resource(self):
+        return self._source_resource
 
     @property
     def target(self):
         return self._target
 
     @property
-    def target_asset(self):
-        return self._target_asset
+    def target_resource(self):
+        return self._target_resource
 
 
-class MarketplaceHolding(object):
+class MarketplaceAsset(object):
 
-    def __init__(self, holding_id, quantity, asset):
-        self._holding_id = holding_id
+    def __init__(self, asset_id, quantity, resource):
+        self._asset_id = asset_id
         self._quantity = quantity
-        self._asset = asset
+        self._resource = resource
 
     @property
-    def holding_id(self):
-        return self._holding_id
+    def asset_id(self):
+        return self._asset_id
 
     @property
     def quantity(self):
         return self._quantity
 
     @property
-    def asset(self):
-        return self._asset
+    def resource(self):
+        return self._resource

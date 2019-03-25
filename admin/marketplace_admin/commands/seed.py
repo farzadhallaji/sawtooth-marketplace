@@ -53,17 +53,17 @@ def do_seed(opts):
                             account['label'])
                 continue
 
-        responses = {'ASSETS': [], 'HOLDINGS': [], 'OFFERS': []}
+        responses = {'RESOURCES': [], 'ASSETS': [], 'OFFERS': []}
+
+        for resource in account['RESOURCES']:
+            LOGGER.debug('Submitting Resource: %s', resource['name'])
+            data.swap_refs(resource, responses)
+            responses['RESOURCES'].append(submit('resources', resource, auth))
 
         for asset in account['ASSETS']:
-            LOGGER.debug('Submitting Asset: %s', asset['name'])
+            LOGGER.debug('Submitting Asset: %s', asset['label'])
             data.swap_refs(asset, responses)
             responses['ASSETS'].append(submit('assets', asset, auth))
-
-        for holding in account['HOLDINGS']:
-            LOGGER.debug('Submitting Holding: %s', holding['label'])
-            data.swap_refs(holding, responses)
-            responses['HOLDINGS'].append(submit('holdings', holding, auth))
 
         for offer in account['OFFERS']:
             LOGGER.debug('Submitting Offer: %s', offer['label'])

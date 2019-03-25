@@ -141,9 +141,64 @@ paths:
         500:
           $ref: '#/responses/500ServerError'
 
+  /resources:
+    post:
+      description: Creates a new Resource in state
+      security:
+        - AuthToken: []
+      parameters:
+        - name: resource
+          description: Info for Resource to add to state
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewResourceBody'
+      responses:
+        200:
+          description: Success response with the new Resource
+          schema:
+            $ref: '#/definitions/ResourceObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        401:
+          $ref: '#/responses/401Unauthorized'
+        500:
+          $ref: '#/responses/500ServerError'
+
+    get:
+      description: Fetches complete details of all Resources in state
+      responses:
+        200:
+          description: Success response with a list of Resources
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ResourceObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+
+  /resources/{name}:
+    parameters:
+      - $ref: '#/parameters/ResourceName'
+    get:
+      description: Fetches the details of particular Resource in state
+      responses:
+        200:
+          description: Success response with the requested Resource
+          schema:
+            $ref: '#/definitions/ResourceObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500ServerError'
+
   /assets:
     post:
-      description: Creates a new Asset in state
+      description: Creates a new Asset for the authorized Account
       security:
         - AuthToken: []
       parameters:
@@ -158,61 +213,6 @@ paths:
           description: Success response with the new Asset
           schema:
             $ref: '#/definitions/AssetObject'
-        400:
-          $ref: '#/responses/400BadRequest'
-        401:
-          $ref: '#/responses/401Unauthorized'
-        500:
-          $ref: '#/responses/500ServerError'
-
-    get:
-      description: Fetches complete details of all Assets in state
-      responses:
-        200:
-          description: Success response with a list of Assets
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/AssetObject'
-        400:
-          $ref: '#/responses/400BadRequest'
-        500:
-          $ref: '#/responses/500ServerError'
-
-  /assets/{name}:
-    parameters:
-      - $ref: '#/parameters/AssetName'
-    get:
-      description: Fetches the details of particular Asset in state
-      responses:
-        200:
-          description: Success response with the requested Asset
-          schema:
-            $ref: '#/definitions/AssetObject'
-        400:
-          $ref: '#/responses/400BadRequest'
-        404:
-          $ref: '#/responses/404NotFound'
-        500:
-          $ref: '#/responses/500ServerError'
-
-  /holdings:
-    post:
-      description: Creates a new Holding for the authorized Account
-      security:
-        - AuthToken: []
-      parameters:
-        - name: holding
-          description: Info for Holding to add to state
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/NewHoldingBody'
-      responses:
-        200:
-          description: Success response with the new Holding
-          schema:
-            $ref: '#/definitions/HoldingObject'
         400:
           $ref: '#/responses/400BadRequest'
         401:
@@ -248,19 +248,19 @@ paths:
       description: Fetches complete details of all Offers in state
       parameters:
         - name: status
-          description: Filters Offers to those with a particular source Asset
+          description: Filters Offers to those with a particular source Resource
           in: query
           type: string
           enum:
             - open
             - closed
         - name: source
-          description: Filters Offers to those with a particular source Asset
+          description: Filters Offers to those with a particular source Resource
           in: query
           type: string
           x-example: Platinum%20Status
         - name: target
-          description: Filters Offers to those with a particular target Asset
+          description: Filters Offers to those with a particular target Resource
           in: query
           type: string
           x-example: Sawbuck
@@ -370,9 +370,9 @@ parameters:
     type: string
     x-example: 02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a
 
-  AssetName:
+  ResourceName:
     name: name
-    description: The unique name of a particular Asset in state
+    description: The unique name of a particular Resource in state
     in: path
     required: true
     type: string
@@ -393,7 +393,7 @@ definitions:
       error:
         description: A message describing the error that occured
         type: string
-        example: The Asset name specified already exists, names must be unique
+        example: The Resource name specified already exists, names must be unique
 
 # Authentication
 
@@ -418,7 +418,7 @@ definitions:
 # Accounts
 
   BaseAccountObject:
-    description: An actor in the system controlling various Holdings of Assets
+    description: An actor in the system controlling various Assets of Resources
     type: object
     properties:
       publicKey:
@@ -433,11 +433,11 @@ definitions:
         description: A human readable description for the Account
         type: string
         example: VP of Loyalty Encouragement for Sawbucks
-      holdings:
-        description: List of Holdings which belong to the Account
+      assets:
+        description: List of Assets which belong to the Account
         type: array
         items:
-          $ref: '#/definitions/HoldingObject'
+          $ref: '#/definitions/AssetObject'
 
   AuthorizedAccountObject:
     description: Account with additional information sent to authorized request
@@ -474,96 +474,96 @@ definitions:
         type: string
         example: '12345'
 
-  HoldingObject:
-    description: A Holding with a certain quantity of a particular Asset
+  AssetObject:
+    description: A Asset with a certain quantity of a particular Resource
     type: object
     properties:
       id:
-        description: A unique id for the Holding
+        description: A unique id for the Asset
         type: string
         example: 7ea843aa-1650-4530-94b1-a445d2a8193a
       label:
-        description: A human readable name for the Holding (not unique)
+        description: A human readable name for the Asset (not unique)
         type: string
         example: Sawbucks Cache
-      description:
-        description: A human readable description for the Holding
-        type: string
-        example: Master source of all Sawbucks
-      asset:
-        description: The unique name of the Asset which this Holding contains
-        type: string
-        example: Sawbuck
-      quantity:
-        description: The quantity of the Asset
-        type: integer
-        example: 100000
-
-  NewHoldingBody:
-    description: Details provided to create a new Holding
-    type: object
-    required:
-      - asset
-    properties:
-      label:
-        description: A human readable name for the Holding (not unique)
-        type: string
-        example: Sawbucks Cache
-      description:
-        description: A human readable description for the Holding
-        type: string
-        example: Master source of all Sawbucks
-      asset:
-        description: The unique name of the Asset which this Holding contains
-        type: string
-        example: Sawbuck
-      quantity:
-        description: The quantity of the Asset
-        type: integer
-        default: 0
-
-# Assets
-
-  AssetObject:
-    description: Describes a thing of value which Holdings might contain
-    type: object
-    properties:
-      name:
-        description: A unique name for the Asset
-        type: string
-        example: Sawbuck
       description:
         description: A human readable description for the Asset
         type: string
-        example: VP of Loyalty Encouragement for Sawbucks
-      owners:
-        description: List of ids for Accounts which control the Asset
-        type: array
-        items:
-          type: string
-          example: 02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a
-      rules:
-        description: List of Rules which control Asset behavior
-        type: array
-        items:
-          $ref: '#/definitions/RuleObject'
+        example: Master source of all Sawbucks
+      resource:
+        description: The unique name of the Resource which this Asset contains
+        type: string
+        example: Sawbuck
+      quantity:
+        description: The quantity of the Resource
+        type: integer
+        example: 100000
 
   NewAssetBody:
     description: Details provided to create a new Asset
     type: object
     required:
-      - name
+      - resource
     properties:
-      name:
-        description: A unique name for the Asset
+      label:
+        description: A human readable name for the Asset (not unique)
         type: string
-        example: Sawbuck
+        example: Sawbucks Cache
       description:
         description: A human readable description for the Asset
         type: string
+        example: Master source of all Sawbucks
+      resource:
+        description: The unique name of the Resource which this Asset contains
+        type: string
+        example: Sawbuck
+      quantity:
+        description: The quantity of the Resource
+        type: integer
+        default: 0
+
+# Resources
+
+  ResourceObject:
+    description: Describes a thing of value which Assets might contain
+    type: object
+    properties:
+      name:
+        description: A unique name for the Resource
+        type: string
+        example: Sawbuck
+      description:
+        description: A human readable description for the Resource
+        type: string
+        example: VP of Loyalty Encouragement for Sawbucks
+      owners:
+        description: List of ids for Accounts which control the Resource
+        type: array
+        items:
+          type: string
+          example: 02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a
+      rules:
+        description: List of Rules which control Resource behavior
+        type: array
+        items:
+          $ref: '#/definitions/RuleObject'
+
+  NewResourceBody:
+    description: Details provided to create a new Resource
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        description: A unique name for the Resource
+        type: string
+        example: Sawbuck
+      description:
+        description: A human readable description for the Resource
+        type: string
         example: VP of Loyalty Encouragement for Sawbucks
       rules:
-        description: List of Rules which control Asset behavior
+        description: List of Rules which control Resource behavior
         type: array
         items:
           $ref: '#/definitions/RuleObject'
@@ -571,7 +571,7 @@ definitions:
 # Offers
 
   OfferObject:
-    description: An Offer to exchange one type of Asset for another
+    description: An Offer to exchange one type of Resource for another
     type: object
     properties:
       id:
@@ -593,7 +593,7 @@ definitions:
           type: string
           example: 02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a
       source:
-        description: The id of a Holding from which resources will be drawn
+        description: The id of a Asset from which resources will be drawn
         type: string
         example: 7ea843aa-1650-4530-94b1-a445d2a8193a
       sourceQuantity:
@@ -601,7 +601,7 @@ definitions:
         type: integer
         example: 1
       target:
-        description: The id of a Holding which will receive resources
+        description: The id of a Asset which will receive resources
         type: string
         example: ddb5b98b-8d34-466a-94cb-06288755312b
       targetQuantity:
@@ -609,7 +609,7 @@ definitions:
         type: integer
         example: 1000
       rules:
-        description: List of Rules which control Asset behavior
+        description: List of Rules which control Resource behavior
         type: array
         items:
           $ref: '#/definitions/RuleObject'
@@ -621,7 +621,7 @@ definitions:
           - CLOSED
 
   NewOfferBody:
-    description: Details provided to create a new Asset
+    description: Details provided to create a new Resource
     type: object
     required:
       - source
@@ -636,7 +636,7 @@ definitions:
         type: string
         example: Limited time offer to get Platinum Status for 1000 Sawbucks!!!
       source:
-        description: The id of a Holding from which resources will be drawn
+        description: The id of a Asset from which resources will be drawn
         type: string
         example: 7ea843aa-1650-4530-94b1-a445d2a8193a
       sourceQuantity:
@@ -645,7 +645,7 @@ definitions:
         minimum: 1
         example: 1
       target:
-        description: The id of a Holding which will receive resources
+        description: The id of a Asset which will receive resources
         type: string
         example: ddb5b98b-8d34-466a-94cb-06288755312b
       targetQuantity:
@@ -654,7 +654,7 @@ definitions:
         minimum: 1
         example: 1000
       rules:
-        description: List of Rules which control Asset behavior
+        description: List of Rules which control Resource behavior
         type: array
         items:
           $ref: '#/definitions/RuleObject'
@@ -667,7 +667,7 @@ definitions:
       - target
     properties:
       source:
-        description: The id of a Holding from which resources will be drawn
+        description: The id of a Asset from which resources will be drawn
         type: string
         example: 0ab3febf-e7a3-4b90-966a-68e2f273c7a5
       count:
@@ -675,7 +675,7 @@ definitions:
         type: integer
         example: 1000
       target:
-        description: The id of a Holding which will receive resources
+        description: The id of a Asset which will receive resources
         type: string
         example: f78b57cb-1b20-41da-a730-9128c32dc5e5
 
@@ -684,7 +684,7 @@ definitions:
   RuleObject:
     description: |
       A simple enum and with optional value, used to constrain and define the
-      behavior of Assets or Offers
+      behavior of Resources or Offers
     type: object
     required:
       - type
@@ -693,8 +693,8 @@ definitions:
         description: The enum which defines the Rule
         type: string
         enum:
-          - OWNER_HOLDINGS_INFINITE
-          - ALL_HOLDINGS_INFINITE
+          - OWNER_ASSETS_INFINITE
+          - ALL_ASSETS_INFINITE
           - NOT_TRANSFERABLE
           - REQUIRE_TARGET_TYPES
           - REQUIRE_TARGET_QUANTITIES

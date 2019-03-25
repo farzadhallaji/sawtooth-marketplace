@@ -33,16 +33,16 @@ def fetch_latest_block_num():
         raise ApiInternalError('No block data found in state')
 
 
-def fetch_holdings(holding_ids):
-    return r.table('holdings')\
-        .get_all(r.args(holding_ids), index='id')\
-        .filter(lambda holding: (
-            fetch_latest_block_num() >= holding['start_block_num'])
-                & (fetch_latest_block_num() < holding['end_block_num']))\
-        .map(lambda holding: (holding['label'] == "").branch(
-            holding.without('label'), holding))\
-        .map(lambda holding: (holding['description'] == "").branch(
-            holding.without('description'), holding))\
+def fetch_assets(asset_ids):
+    return r.table('assets')\
+        .get_all(r.args(asset_ids), index='id')\
+        .filter(lambda asset: (
+            fetch_latest_block_num() >= asset['start_block_num'])
+                & (fetch_latest_block_num() < asset['end_block_num']))\
+        .map(lambda asset: (asset['label'] == "").branch(
+            asset.without('label'), asset))\
+        .map(lambda asset: (asset['description'] == "").branch(
+            asset.without('description'), asset))\
         .without('start_block_num', 'end_block_num', 'delta_id', 'account')\
         .coerce_to('array')
 

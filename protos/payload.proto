@@ -22,8 +22,8 @@ message TransactionPayload {
     enum PayloadType {
         TYPE_UNSET = 0;
         CREATE_ACCOUNT = 2;
-        CREATE_ASSET = 3;
-        CREATE_HOLDING = 4;
+        CREATE_RESOURCE = 3;
+        CREATE_ASSET = 4;
         CREATE_OFFER = 5;
         ACCEPT_OFFER = 10;
         CLOSE_OFFER = 11;
@@ -32,8 +32,8 @@ message TransactionPayload {
     PayloadType payload_type = 1;
 
     CreateAccount create_account = 2;
-    CreateAsset create_asset = 3;
-    CreateHolding create_holding = 4;
+    CreateResource create_resource = 3;
+    CreateAsset create_asset = 4;
     CreateOffer create_offer = 5;
     AcceptOffer accept_offer = 10;
     CloseOffer close_offer = 11;
@@ -44,17 +44,17 @@ message CreateAccount {
     string description = 2;
 }
 
-message CreateAsset {
+message CreateResource {
     string name = 1;
     string description = 2;
     repeated Rule rules = 3;
 }
 
-message CreateHolding {
+message CreateAsset {
     string id = 1;
     string label = 2;
     string description = 3;
-    string asset = 4;
+    string resource = 4;
     sint64 quantity = 5;
 }
 

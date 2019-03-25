@@ -24,30 +24,30 @@ from db.common import parse_rules
 
 r=re.RethinkDB()
 
-async def fetch_all_asset_resources(conn):
-    return await r.table('assets')\
+async def fetch_all_resource_resources(conn):
+    return await r.table('resources')\
         .filter((fetch_latest_block_num() >= r.row['start_block_num'])
                 & (fetch_latest_block_num() < r.row['end_block_num']))\
-        .map(lambda asset: (asset['description'] == "").branch(
-            asset.without('description'), asset))\
-        .map(lambda asset: (asset['rules'] == []).branch(
-            asset, asset.merge(parse_rules(asset['rules']))))\
+        .map(lambda resource: (resource['description'] == "").branch(
+            resource.without('description'), resource))\
+        .map(lambda resource: (resource['rules'] == []).branch(
+            resource, resource.merge(parse_rules(resource['rules']))))\
         .without('start_block_num', 'end_block_num', 'delta_id')\
         .coerce_to('array').run(conn)
 
 
-async def fetch_asset_resource(conn, name):
+async def fetch_resource_resource(conn, name):
     try:
-        return await r.table('assets')\
+        return await r.table('resources')\
             .get_all(name, index='name')\
             .max('start_block_num')\
-            .do(lambda asset: (asset['description'] == "").branch(
-                asset.without('description'), asset))\
-            .do(lambda asset: (asset['rules'] == []).branch(
-                asset, asset.merge(parse_rules(asset['rules']))))\
+            .do(lambda resource: (resource['description'] == "").branch(
+                resource.without('description'), resource))\
+            .do(lambda resource: (resource['rules'] == []).branch(
+                resource, resource.merge(parse_rules(resource['rules']))))\
             .without('start_block_num', 'end_block_num', 'delta_id')\
             .run(conn)
     except ReqlNonExistenceError:
         raise ApiBadRequest(
             "Bad Request: "
-            "No asset with the name {} exists".format(name))
+            "No resource with the name {} exists".format(name))

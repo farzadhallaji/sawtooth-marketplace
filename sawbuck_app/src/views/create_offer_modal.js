@@ -40,78 +40,78 @@ const check = (isVisible = true) => {
            ' ')
 }
 
-// Filters holdings by asset if set, sorting otherwise
-const getHoldings = (holdings, asset = null) => {
-  if (asset) {
-    return holdings.filter(holding => holding.asset === asset)
+// Filters assets by resource if set, sorting otherwise
+const getAssets = (assets, resource = null) => {
+  if (resource) {
+    return assets.filter(asset => asset.resource === resource)
   }
-  return _.sortBy(holdings, ['asset', 'label'])
+  return _.sortBy(assets, ['resource', 'label'])
 }
 
 // Returns a functon which sets id and label keys for source
-const sourceSetter = (state, key = 'source') => (id, asset) => () => {
+const sourceSetter = (state, key = 'source') => (id, resource) => () => {
   state.offer[key] = id
-  state[`${key}Label`] = asset
+  state[`${key}Label`] = resource
 }
 
 // Returns a function which sets id, label, and additional keys for target
-const targetSetter = state => (id, asset, isFree, isNew) => () => {
-  sourceSetter(state, 'target')(id, asset)()
+const targetSetter = state => (id, resource, isFree, isNew) => () => {
+  sourceSetter(state, 'target')(id, resource)()
   state.noTarget = isFree
-  state.hasNewHolding = isNew
+  state.hasNewAsset = isNew
 }
 
 // Gets a list of option objects, with text and an onclick function
-const getOptions = (holdings, state, key = 'source') => {
+const getOptions = (assets, state, key = 'source') => {
   const setter = key !== 'target' ? sourceSetter(state) : targetSetter(state)
 
-  return holdings.map(holding => ({
+  return assets.map(asset => ({
     text: [
-      check(state.offer[key] === holding.id),
-      `${holding.asset} (${holding.label || holding.id})`
+      check(state.offer[key] === asset.id),
+      `${asset.resource} (${asset.label || asset.id})`
     ],
-    onclick: setter(holding.id, holding.asset)
+    onclick: setter(asset.id, asset.resource)
   }))
 }
 
-// Returns two additional options, free and new holding
+// Returns two additional options, free and new asset
 const optionsTail = state => {
   return [{
-    text: [check(state.noTarget === true), m('em', 'free (No Holding)')],
+    text: [check(state.noTarget === true), m('em', 'free (No Asset)')],
     onclick: targetSetter(state)(null, 'free', true)
   }, {
-    text: [check(state.hasNewHolding === true), m('em', 'new (New Holding)')],
+    text: [check(state.hasNewAsset === true), m('em', 'new (New Asset)')],
     onclick: targetSetter(state)(null, 'new', false, true)
   }]
 }
 
-// A small dropdown for selecting an asset for a new holding
-const assetDropdown = (label, assets, onValue) => {
+// A small dropdown for selecting an resource for a new asset
+const resourceDropdown = (label, resources, onValue) => {
   return m('span.dropdown.ml-3', [
     m('button.btn.btn-success.btn-sm.dropdown-toggle.mb-1', {
       type: 'button',
       'data-toggle': 'dropdown',
       'aria-haspopup': 'true',
       'aria-expanded': 'false'
-    }, label || 'Asset'),
+    }, label || 'Resource'),
     m('.dropdown-menu',
-      assets.map(asset => {
+      resources.map(resource => {
         return m('button.dropdown-item', {
           type: 'button',
-          onclick: () => onValue(asset.name)
-        }, check(label === asset.name), asset.name)
+          onclick: () => onValue(resource.name)
+        }, check(label === resource.name), resource.name)
       }))
   ])
 }
 
-// Small fields with placeholders rather than headers, for new holdings
-const holdingField = (placeholder, onValue) => {
+// Small fields with placeholders rather than headers, for new assets
+const assetField = (placeholder, onValue) => {
   return forms.field(onValue, { placeholder, required: false })
 }
 
 // A labeled checkbox that will set or unset a rule in state
 const ruleCheckbox = (state, name, label) => {
-  const path = ['holding', 'rules', name, 'isSet']
+  const path = ['asset', 'rules', name, 'isSet']
   return m('.form-check', [
     m('label.form-check-label',
       m('input.form-check-input', {
@@ -123,7 +123,7 @@ const ruleCheckbox = (state, name, label) => {
 
 // Convert booleans and values in state to proper rule objects
 const getRules = state => {
-  const ruleObj = _.get(state, 'holding.rules', {})
+  const ruleObj = _.get(state, 'asset.rules', {})
   return _.reduce(ruleObj, (rules, rule, type) => {
     if (rule.isSet) {
       const newRule = { type }
@@ -141,28 +141,28 @@ const isFormValid = state => {
   if (state.noTarget) return true
 
   if (!state.offer.targetQuantity) return false
-  if (state.hasNewHolding && !state.holding.asset) return false
-  if (!state.hasNewHolding && !state.offer.target) return false
+  if (state.hasNewAsset && !state.asset.resource) return false
+  if (!state.hasNewAsset && !state.offer.target) return false
 
   return true
 }
 
-// Returns a function which will submit a new offer, and holding if applicable
+// Returns a function which will submit a new offer, and asset if applicable
 const submitter = (state, onDone) => () => {
   return Promise.resolve()
     .then(() => {
-      if (state.hasNewHolding) {
-        const holdingKeys = ['label', 'description', 'asset']
-        return api.post('holdings', _.pick(state.holding, holdingKeys))
+      if (state.hasNewAsset) {
+        const assetKeys = ['label', 'description', 'resource']
+        return api.post('assets', _.pick(state.asset, assetKeys))
       }
     })
-    .then(holding => {
+    .then(asset => {
       const offerKeys = [
         'label', 'description', 'source', 'sourceQuantity',
         'target', 'targetQuantity'
       ]
       const offer = _.pick(state.offer, offerKeys)
-      if (holding) offer.target = holding.id
+      if (asset) offer.target = asset.id
       offer.rules = getRules(state)
       return api.post('offers', offer)
     })
@@ -173,25 +173,25 @@ const submitter = (state, onDone) => () => {
     .catch(api.alertError)
 }
 
-// A versatile modal allowing users to create new offers (and new holdings)
+// A versatile modal allowing users to create new offers (and new assets)
 const CreateOfferModal = {
   oninit (vnode) {
     vnode.state.offer = {}
-    vnode.state.holding = {}
-    vnode.state.hasNewHolding = false
+    vnode.state.asset = {}
+    vnode.state.hasNewAsset = false
 
     return Promise.all([
       acct.getUserAccount(),
-      vnode.attrs.target ? null : api.get('assets')
+      vnode.attrs.target ? null : api.get('resources')
     ])
-      .then(([ account, assets ]) => {
+      .then(([ account, resources ]) => {
         if (!account) return vnode.attrs.cancelFn()
-        if (assets && assets.error) return console.error(account.error)
+        if (resources && resources.error) return console.error(account.error)
         if (account.error) return console.error(account.error)
-        vnode.state.assets = assets
+        vnode.state.resources = resources
 
-        vnode.state.sources = getHoldings(account.holdings, vnode.attrs.source)
-        vnode.state.targets = getHoldings(account.holdings, vnode.attrs.target)
+        vnode.state.sources = getAssets(account.assets, vnode.attrs.source)
+        vnode.state.targets = getAssets(account.assets, vnode.attrs.target)
 
         if (vnode.attrs.source) {
           vnode.state.sourceLabel = vnode.attrs.source
@@ -206,7 +206,7 @@ const CreateOfferModal = {
   },
 
   view (vnode) {
-    const assets = _.get(vnode.state, 'assets', [])
+    const resources = _.get(vnode.state, 'resources', [])
     const sources = _.get(vnode.state, 'sources', [])
     const targets = _.get(vnode.state, 'targets', [])
     const sourceOptions = getOptions(sources, vnode.state)
@@ -254,16 +254,16 @@ const CreateOfferModal = {
               disabled: vnode.state.noTarget
             })
           }, 'right'),
-          !vnode.state.hasNewHolding
+          !vnode.state.hasNewAsset
             ? null
-            : forms.group('New Holding', [
-              assetDropdown(
-                vnode.state.holding.asset,
-                assets,
-                setter('holding.asset')),
+            : forms.group('New Asset', [
+              resourceDropdown(
+                vnode.state.asset.resource,
+                resources,
+                setter('asset.resource')),
               layout.row([
-                holdingField('Label', setter('holding.label')),
-                holdingField('Description', setter('holding.description'))
+                assetField('Label', setter('asset.label')),
+                assetField('Description', setter('asset.description'))
               ])
             ]),
           m('hr'),
@@ -281,9 +281,9 @@ const CreateOfferModal = {
             layout.row(ruleCheckbox(
               vnode.state,
               'EXCHANGE_LIMITED_TO_ACCOUNTS',
-              holdingField(
+              assetField(
                 'Limit to public key',
-                setter('holding.rules.EXCHANGE_LIMITED_TO_ACCOUNTS.keys'))))
+                setter('asset.rules.EXCHANGE_LIMITED_TO_ACCOUNTS.keys'))))
           ])
         ])),
       modals.footer(

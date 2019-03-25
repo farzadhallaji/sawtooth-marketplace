@@ -150,7 +150,7 @@ def _create_account_dict(body, public_key):
     account = {k: body[k] for k in keys if body.get(k) is not None}
 
     account['publicKey'] = public_key
-    account['holdings'] = []
+    account['assets'] = []
 
     return account
 

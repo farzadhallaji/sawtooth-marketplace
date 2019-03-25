@@ -40,23 +40,23 @@ const checkMark = (isVisible = true) => {
            ' ')
 }
 
-// Small fields with placeholders rather than headers, for new holdings
-const holdingField = (placeholder, onValue) => {
+// Small fields with placeholders rather than headers, for new assets
+const assetField = (placeholder, onValue) => {
   return forms.field(onValue, { placeholder, required: false })
 }
 
-// Returns a function which sets id, label, and new for outgoing holdings
-const outSetter = state => holding => () => {
-  state.acceptance.out = holding.id
-  state.outLabel = holding.asset
-  state.outMax = holding.quantity
+// Returns a function which sets id, label, and new for outgoing assets
+const outSetter = state => asset => () => {
+  state.acceptance.out = asset.id
+  state.outLabel = asset.resource
+  state.outMax = asset.quantity
 }
 
-// Returns a function which sets id and label keys for the incoming holdings
-const inSetter = state => (holding, hasNew) => () => {
-  state.acceptance.in = holding.id
-  state.inLabel = holding.asset
-  state.hasNewHolding = hasNew
+// Returns a function which sets id and label keys for the incoming assets
+const inSetter = state => (asset, hasNew) => () => {
+  state.acceptance.in = asset.id
+  state.inLabel = asset.resource
+  state.hasNewAsset = hasNew
 }
 
 const countSetter = state => inQuantity => {
@@ -81,25 +81,25 @@ const countSetter = state => inQuantity => {
   state.outQuantity = count * state.offer.targetQuantity
 }
 
-// Returns a function to map holding data to dropdown options
+// Returns a function to map asset data to dropdown options
 const optionMapper = (state, key = 'in') => {
   const setter = key !== 'out' ? inSetter(state) : outSetter(state)
 
-  return holding => ({
-    isSelected: () => state.acceptance[key] === holding.id,
-    text: `${holding.asset} (${holding.label || holding.id})`,
-    onclick: setter(holding, false)
+  return asset => ({
+    isSelected: () => state.acceptance[key] === asset.id,
+    text: `${asset.resource} (${asset.label || asset.id})`,
+    onclick: setter(asset, false)
   })
 }
 
-// Returns a dropdown option which will trigger holding creation
+// Returns a dropdown option which will trigger asset creation
 const newOption = state => ({
-  isSelected: () => !!state.hasNewHolding,
-  text: m('em', 'new (New Holding)'),
-  onclick: inSetter(state)({ asset: 'new' }, true)
+  isSelected: () => !!state.hasNewAsset,
+  text: m('em', 'new (New Asset)'),
+  onclick: inSetter(state)({ resource: 'new' }, true)
 })
 
-// Adds a check mark to the appropriate holding option
+// Adds a check mark to the appropriate asset option
 const checkMarkMapper = (state, key = 'in') => option => {
   return _.assign({}, option, {
     text: [
@@ -112,22 +112,22 @@ const checkMarkMapper = (state, key = 'in') => option => {
 // Returns true or false depending on whether or not the form is valid
 const isFormValid = state => !!state.acceptance.count
 
-// Returns a function which will submit a new offer, and holding if applicable
+// Returns a function which will submit a new offer, and asset if applicable
 const submitter = (state, onDone) => () => {
   return Promise.resolve()
     .then(() => {
-      if (state.hasNewHolding) {
-        const holdingKeys = ['label', 'description', 'asset']
-        return api.post('holdings', _.pick(state.holding, holdingKeys))
+      if (state.hasNewAsset) {
+        const assetKeys = ['label', 'description', 'resource']
+        return api.post('assets', _.pick(state.asset, assetKeys))
       }
     })
-    .then(holding => {
+    .then(asset => {
       const acceptance = {
         count: state.acceptance.count,
         target: state.acceptance.in
       }
       if (state.acceptance.out) acceptance.source = state.acceptance.out
-      if (holding) acceptance.target = holding.id
+      if (asset) acceptance.target = asset.id
       return api.patch(`offers/${state.offer.id}/accept`, acceptance)
     })
     .then(onDone)
@@ -137,16 +137,16 @@ const submitter = (state, onDone) => () => {
     .catch(api.alertError)
 }
 
-const getAsset = (id, holdings) => {
-  return holdings.find(holding => holding.id === id).asset
+const getResource = (id, assets) => {
+  return assets.find(asset => asset.id === id).resource
 }
 
-// A versatile modal allowing users to create new offers (and new holdings)
+// A versatile modal allowing users to create new offers (and new assets)
 const AcceptOfferModal = {
   oninit (vnode) {
-    vnode.state.holding = {}
+    vnode.state.asset = {}
     vnode.state.acceptance = {}
-    vnode.state.hasNewHolding = false
+    vnode.state.hasNewAsset = false
 
     api.get(`offers/${vnode.attrs.offerId}`)
       .then(offer => {
@@ -159,18 +159,18 @@ const AcceptOfferModal = {
         ])
       })
       .then(([ user, owner ]) => {
-        const inAsset = getAsset(vnode.state.offer.source, owner.holdings)
-        vnode.state.holding.asset = inAsset
-        vnode.state.inOptions = user.holdings
-          .filter(holding => holding.asset === inAsset)
+        const inResource = getResource(vnode.state.offer.source, owner.assets)
+        vnode.state.asset.resource = inResource
+        vnode.state.inOptions = user.assets
+          .filter(asset => asset.resource === inResource)
           .map(optionMapper(vnode.state))
           .concat(newOption(vnode.state))
         vnode.state.inOptions[0].onclick()
 
         if (vnode.state.offer.target) {
-          const outAsset = getAsset(vnode.state.offer.target, owner.holdings)
-          vnode.state.outOptions = user.holdings
-            .filter(holding => holding.asset === outAsset)
+          const outResource = getResource(vnode.state.offer.target, owner.assets)
+          vnode.state.outOptions = user.assets
+            .filter(asset => asset.resource === outResource)
             .map(optionMapper(vnode.state, 'out'))
           vnode.state.outOptions[0].onclick()
         } else {
@@ -180,21 +180,21 @@ const AcceptOfferModal = {
         // Set initial count/quantity values to the minimum exchange
         countSetter(vnode.state)(1)
 
-        return Promise.all([ owner, api.get(`assets/${inAsset}`) ])
+        return Promise.all([ owner, api.get(`resources/${inResource}`) ])
       })
-      .then(([ owner, inAsset ]) => {
-        const allInfinite = inAsset.rules.find(({ type }) => {
-          return type === 'ALL_HOLDINGS_INFINITE'
+      .then(([ owner, inResource ]) => {
+        const allInfinite = inResource.rules.find(({ type }) => {
+          return type === 'ALL_ASSETS_INFINITE'
         })
-        const ownerInfinite = inAsset.rules.find(({ type }) => {
-          return type === 'OWNER_HOLDINGS_INFINITE'
+        const ownerInfinite = inResource.rules.find(({ type }) => {
+          return type === 'OWNER_ASSETS_INFINITE'
         })
-        const isOwner = owner.publicKey === inAsset.owners[0].publicKey
+        const isOwner = owner.publicKey === inResource.owners[0].publicKey
 
         vnode.state.inMax = allInfinite || (ownerInfinite && isOwner)
           ? Number.MAX_SAFE_INTEGER
-          : owner.holdings
-            .find(holding => holding.id === vnode.state.offer.source)
+          : owner.assets
+            .find(asset => asset.id === vnode.state.offer.source)
             .quantity
       })
   },
@@ -211,7 +211,7 @@ const AcceptOfferModal = {
       modals.body(
         m('.container', [
           m('.text-muted.mb-2',
-            `Enter how much ${vnode.state.holding.asset} you would like`),
+            `Enter how much ${vnode.state.asset.resource} you would like`),
           mkt.bifold({
             header: layout.dropdown(
               truncatedLabel(vnode.state.inLabel, 'Offered'),
@@ -229,11 +229,11 @@ const AcceptOfferModal = {
               'success'),
             body: vnode.state.outQuantity || '---'
           }),
-          !vnode.state.hasNewHolding
+          !vnode.state.hasNewAsset
             ? null
-            : forms.group('New Holding', layout.row([
-              holdingField('Label', setter('holding.label')),
-              holdingField('Description', setter('holding.description'))
+            : forms.group('New Asset', layout.row([
+              assetField('Label', setter('asset.label')),
+              assetField('Description', setter('asset.description'))
             ]))
         ])),
       modals.footer(

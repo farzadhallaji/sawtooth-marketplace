@@ -18,7 +18,7 @@ from rethinkdb.errors import ReqlNonExistenceError
 
 from api.errors import ApiBadRequest
 
-from db.common import fetch_holdings
+from db.common import fetch_assets
 from db.common import fetch_latest_block_num
 
 r=re.RethinkDB()
@@ -31,7 +31,7 @@ async def fetch_all_account_resources(conn):
         .map(lambda account: account.merge(
             {'publicKey': account['public_key']}))\
         .map(lambda account: account.merge(
-            {'holdings': fetch_holdings(account['holdings'])}))\
+            {'assets': fetch_assets(account['assets'])}))\
         .map(lambda account: (account['label'] == "").branch(
             account.without('label'), account))\
         .map(lambda account: (account['description'] == "").branch(
@@ -47,7 +47,7 @@ async def fetch_account_resource(conn, public_key, auth_key):
             .get_all(public_key, index='public_key')\
             .max('start_block_num')\
             .merge({'publicKey': r.row['public_key']})\
-            .merge({'holdings': fetch_holdings(r.row['holdings'])})\
+            .merge({'assets': fetch_assets(r.row['assets'])})\
             .do(lambda account: (r.expr(auth_key).eq(public_key)).branch(
                 account.merge(_fetch_email(public_key)), account))\
             .do(lambda account: (account['label'] == "").branch(

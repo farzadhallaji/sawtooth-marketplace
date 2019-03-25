@@ -30,12 +30,12 @@ def handle_offer_creation(create_offer, header, state):
         InvalidTransaction
             - There is already an Offer with the same identifier.
             - The txn signer does not have an Account.
-            - Either the source or target Holding account is not the signer.
+            - Either the source or target Asset account is not the signer.
             - The source is unset.
             - The source_quantity is unset or 0.
             - The target or target_quantity are set while the other is unset.
-            - The source is not a holding.
-            - THe target is not a holding.
+            - The source is not a asset.
+            - THe target is not a asset.
 
     """
 
@@ -57,22 +57,22 @@ def handle_offer_creation(create_offer, header, state):
         raise InvalidTransaction("Failed to create Offer, source_quantity "
                                  "was unset or 0")
 
-    source_holding = state.get_holding(identifier=create_offer.source)
-    if not source_holding:
+    source_asset = state.get_asset(identifier=create_offer.source)
+    if not source_asset:
         raise InvalidTransaction(
-            "Failed to create Offer, Holding id {} listed as source "
-            "does not refer to a Holding.".format(create_offer.source))
+            "Failed to create Offer, Asset id {} listed as source "
+            "does not refer to a Asset.".format(create_offer.source))
 
-    if not source_holding.account == header.signer_public_key:
+    if not source_asset.account == header.signer_public_key:
         raise InvalidTransaction(
-            "Failed to create Offer, source Holding account {} not "
-            "owned by txn signer {}".format(source_holding.account,
+            "Failed to create Offer, source Asset account {} not "
+            "owned by txn signer {}".format(source_asset.account,
                                             header.signer_public_key))
-    source_asset = state.get_asset(source_holding.asset)
-    if _is_not_transferable(source_asset, header.signer_public_key):
+    source_resource = state.get_resource(source_asset.resource)
+    if _is_not_transferable(source_resource, header.signer_public_key):
         raise InvalidTransaction(
-            "Failed to create Offer, source asset {} are not "
-            "transferable".format(source_asset.name))
+            "Failed to create Offer, source resource {} are not "
+            "transferable".format(source_resource.name))
 
     if create_offer.target and not create_offer.target_quantity or \
             create_offer.target_quantity and not create_offer.target:
@@ -81,22 +81,22 @@ def handle_offer_creation(create_offer, header, state):
                                  "both unset.")
 
     if create_offer.target:
-        target_holding = state.get_holding(identifier=create_offer.target)
-        if not target_holding:
+        target_asset = state.get_asset(identifier=create_offer.target)
+        if not target_asset:
             raise InvalidTransaction(
-                "Failed to create Offer, Holding id {} listed as target "
-                "does not refer to a Holding.".format(create_offer.target))
+                "Failed to create Offer, Asset id {} listed as target "
+                "does not refer to a Asset.".format(create_offer.target))
 
-        if not target_holding.account == header.signer_public_key:
+        if not target_asset.account == header.signer_public_key:
             raise InvalidTransaction(
-                "Failed to create Offer, target Holding account {} not "
-                "owned by txn signer {}".format(target_holding.account,
+                "Failed to create Offer, target Asset account {} not "
+                "owned by txn signer {}".format(target_asset.account,
                                                 header.signer_public_key))
-        target_asset = state.get_asset(target_holding.asset)
-        if _is_not_transferable(target_asset, header.signer_public_key):
+        target_resource = state.get_resource(target_asset.resource)
+        if _is_not_transferable(target_resource, header.signer_public_key):
             raise InvalidTransaction(
-                "Failed to create Offer, target asset {} is not "
-                "transferable".format(target_asset.name))
+                "Failed to create Offer, target resource {} is not "
+                "transferable".format(target_resource.name))
 
     state.set_create_offer(
         identifier=create_offer.id,
@@ -110,9 +110,9 @@ def handle_offer_creation(create_offer, header, state):
         rules=create_offer.rules)
 
 
-def _is_not_transferable(asset, owner_public_key):
-    if _has_rule(asset.rules, rule_pb2.Rule.NOT_TRANSFERABLE) \
-            and owner_public_key not in asset.owners:
+def _is_not_transferable(resource, owner_public_key):
+    if _has_rule(resource.rules, rule_pb2.Rule.NOT_TRANSFERABLE) \
+            and owner_public_key not in resource.owners:
         return True
     return False
 

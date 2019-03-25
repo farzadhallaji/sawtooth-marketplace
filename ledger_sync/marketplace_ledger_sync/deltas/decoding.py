@@ -16,15 +16,15 @@
 from marketplace_addressing.addresser import address_is
 from marketplace_addressing.addresser import AddressSpace
 from marketplace_ledger_sync.protobuf.account_pb2 import AccountContainer
+from marketplace_ledger_sync.protobuf.resource_pb2 import ResourceContainer
 from marketplace_ledger_sync.protobuf.asset_pb2 import AssetContainer
-from marketplace_ledger_sync.protobuf.holding_pb2 import HoldingContainer
 from marketplace_ledger_sync.protobuf.offer_pb2 import OfferContainer
 
 
 CONTAINERS = {
     AddressSpace.ACCOUNT: AccountContainer,
+    AddressSpace.RESOURCE: ResourceContainer,
     AddressSpace.ASSET: AssetContainer,
-    AddressSpace.HOLDING: HoldingContainer,
     AddressSpace.OFFER: OfferContainer
 }
 

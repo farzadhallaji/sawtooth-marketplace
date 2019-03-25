@@ -28,12 +28,12 @@ class OfferHistorySpace(enum.IntEnum):
     STOP = 1
 
 
-class AssetSpace(enum.IntEnum):
+class ResourceSpace(enum.IntEnum):
     START = 1
     STOP = 50
 
 
-class HoldingSpace(enum.IntEnum):
+class AssetSpace(enum.IntEnum):
     START = 50
     STOP = 125
 
@@ -50,8 +50,8 @@ class OfferSpace(enum.IntEnum):
 
 @enum.unique
 class AddressSpace(enum.IntEnum):
-    ASSET = 0
-    HOLDING = 1
+    RESOURCE = 0
+    ASSET = 1
     ACCOUNT = 2
     OFFER = 3
     OFFER_HISTORY = 4
@@ -80,6 +80,15 @@ def make_offer_history_address(offer_id):
     return NS + '00' + offer_hash[:60] + '00'
 
 
+def make_resource_address(resource_id):
+    full_hash = _hash(resource_id)
+
+    return NS + _compress(
+        full_hash,
+        ResourceSpace.START,
+        ResourceSpace.STOP) + full_hash[:62]
+
+
 def make_asset_address(asset_id):
     full_hash = _hash(asset_id)
 
@@ -87,15 +96,6 @@ def make_asset_address(asset_id):
         full_hash,
         AssetSpace.START,
         AssetSpace.STOP) + full_hash[:62]
-
-
-def make_holding_address(holding_id):
-    full_hash = _hash(holding_id)
-
-    return NS + _compress(
-        full_hash,
-        HoldingSpace.START,
-        HoldingSpace.STOP) + full_hash[:62]
 
 
 def make_account_address(account_id):
@@ -130,11 +130,11 @@ def address_is(address):
     if _contains(infix, OfferHistorySpace):
         result = AddressSpace.OFFER_HISTORY
 
+    elif _contains(infix, ResourceSpace):
+        result = AddressSpace.RESOURCE
+
     elif _contains(infix, AssetSpace):
         result = AddressSpace.ASSET
-
-    elif _contains(infix, HoldingSpace):
-        result = AddressSpace.HOLDING
 
     elif _contains(infix, AccountSpace):
         result = AddressSpace.ACCOUNT

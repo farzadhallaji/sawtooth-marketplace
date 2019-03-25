@@ -24,11 +24,11 @@ INVALID_SPEC_IDS = [
     ('02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a',
      lambda d: d['account']['publicKey']),
 
-    ('Sawbuck', lambda d: d['asset']['name']),
+    ('Sawbuck', lambda d: d['resource']['name']),
 
-    ('7ea843aa-1650-4530-94b1-a445d2a8193a', lambda d: d['holding']['id']),
+    ('7ea843aa-1650-4530-94b1-a445d2a8193a', lambda d: d['asset']['id']),
 
-    ('ddb5b98b-8d34-466a-94cb-06288755312b', lambda d: d['holding_2']['id']),
+    ('ddb5b98b-8d34-466a-94cb-06288755312b', lambda d: d['asset_2']['id']),
 
     ('1f68397b-5b38-4aec-9913-4541c7e1d4c4', lambda d: d['offer']['id'])
 ]
@@ -40,12 +40,12 @@ ACCOUNT = {
     'description': 'Susan\'s Account'
 }
 
-ASSET = {
+RESOURCE = {
     'name': 'Suzebuck',
     'description': 'The most valuable currency in the world!',
     'rules': [
         {
-            'type': 'OWNER_HOLDINGS_INFINITE'
+            'type': 'OWNER_ASSETS_INFINITE'
         },
         {
             'type': 'EXCHANGE_LIMITED_TO_ACCOUNTS',
@@ -55,35 +55,35 @@ ASSET = {
     ]
 }
 
-ASSET_2 = {
+RESOURCE_2 = {
     'name': 'Imperial Credit',
     'description': 'Standard form of currency throughout the Galactic Empire'
 }
 
-HOLDING = {
+ASSET = {
     "label": "Suzebucket",
     "description": "The source for all Suzebucks.",
-    "asset": "Suzebuck",
+    "resource": "Suzebuck",
     "quantity": 1337
 }
 
 
-HOLDING_2 = {
+ASSET_2 = {
     "label": "Suzebasket",
     "description": "The source for even more Suzebucks.",
-    "asset": "Suzebuck",
+    "resource": "Suzebuck",
     "quantity": 1337
 }
 
-HOLDING_3 = {
+ASSET_3 = {
     "label": "Credit chip 0",
-    "asset": "Imperial Credit",
+    "resource": "Imperial Credit",
     "quantity": 3000
 }
 
-HOLDING_4 = {
+ASSET_4 = {
     "label": "Credit chip 1",
-    "asset": "Imperial Credit",
+    "resource": "Imperial Credit",
     "quantity": 3000
 }
 
@@ -99,7 +99,7 @@ OFFER = {
     "targetQuantity": 1000,
     'rules': [
         {
-            'type': 'OWNER_HOLDINGS_INFINITE'
+            'type': 'OWNER_ASSETS_INFINITE'
         },
         {
             'type': 'EXCHANGE_LIMITED_TO_ACCOUNTS',
@@ -173,19 +173,19 @@ def initialize_sample_resources(txns):
     seeded_data['auth'] = account_response['authorization']
     seeded_data['account'] = account_response['account']
 
-    # Create ASSET
+    # Create RESOURCE
     for spec_id, id_getter in INVALID_SPEC_IDS:
         if spec_id == '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a':
-            sub_nested_strings(ASSET, spec_id, id_getter(seeded_data))
+            sub_nested_strings(RESOURCE, spec_id, id_getter(seeded_data))
 
+    seeded_data['resource'] = submit('resources', RESOURCE)
+    seeded_data['resource_2'] = submit('resources', RESOURCE_2)
+
+    # Create ASSETS
     seeded_data['asset'] = submit('assets', ASSET)
     seeded_data['asset_2'] = submit('assets', ASSET_2)
-
-    # Create HOLDINGS
-    seeded_data['holding'] = submit('holdings', HOLDING)
-    seeded_data['holding_2'] = submit('holdings', HOLDING_2)
-    seeded_data['holding_3'] = submit('holdings', HOLDING_3)
-    seeded_data['holding_4'] = submit('holdings', HOLDING_4)
+    seeded_data['asset_3'] = submit('assets', ASSET_3)
+    seeded_data['asset_4'] = submit('assets', ASSET_4)
 
     # Create AUTH_ACCOUNT
     auth_account_response = submit('accounts', AUTH_ACCOUNT)
@@ -193,8 +193,8 @@ def initialize_sample_resources(txns):
     seeded_data['auth_account'] = auth_account_response['account']
 
     # Create OFFER
-    OFFER['source'] = seeded_data['holding']['id']
-    OFFER['target'] = seeded_data['holding_3']['id']
+    OFFER['source'] = seeded_data['asset']['id']
+    OFFER['target'] = seeded_data['asset_3']['id']
     for spec_id, id_getter in INVALID_SPEC_IDS:
         if spec_id == '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a':
             sub_nested_strings(OFFER, spec_id, id_getter(seeded_data))
@@ -209,19 +209,19 @@ def initialize_sample_resources(txns):
 
 
 @hooks.before('/offers > POST > 200 > application/json')
-def add_holding(txn):
+def add_asset(txn):
     patch_body(txn, {
-            'source': seeded_data['holding']['id'],
-            'target': seeded_data['holding_3']['id'],
+            'source': seeded_data['asset']['id'],
+            'target': seeded_data['asset_3']['id'],
             'targetQuantity': 1337
         })
 
 @hooks.before('/offers/{id}/accept > PATCH > 200 > application/json')
 def add_accept_info(txn):
     patch_body(txn, {
-            'source': seeded_data['holding_4']['id'],
+            'source': seeded_data['asset_4']['id'],
             'count': 1,
-            'target': seeded_data['holding_2']['id']
+            'target': seeded_data['asset_2']['id']
         })
 
 
@@ -233,9 +233,9 @@ def add_credentials(txn):
     })
 
 
-@hooks.before('/holdings > POST > 200 > application/json')
-def add_asset_name(txn):
-    patch_body(txn, {'asset': seeded_data['asset']['name']})
+@hooks.before('/assets > POST > 200 > application/json')
+def add_resource_name(txn):
+    patch_body(txn, {'resource': seeded_data['resource']['name']})
 
 
 @hooks.before('/accounts > PATCH > 200 > application/json')

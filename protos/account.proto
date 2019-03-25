@@ -19,7 +19,7 @@ message Account {
     string public_key = 1;
     string label = 2;
     string description = 3;
-    repeated string holdings = 4;
+    repeated string assets = 4;
 }
 
 message AccountContainer {

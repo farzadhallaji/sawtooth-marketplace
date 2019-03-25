@@ -101,13 +101,13 @@ const passwordField = state => {
       infoForm(state, 'password', onSubmit, { type: 'password' })))
 }
 
-const holdingRow = holding => {
+const assetRow = asset => {
   return m('.row.mt-3', [
     m('.col-md-7',
-      layout.row(m('h6', holding.label)),
-      layout.row(m('.text-muted', holding.description))),
+      layout.row(m('h6', asset.label)),
+      layout.row(m('.text-muted', asset.description))),
     m('.col-md-5',
-      mkt.holding(holding.asset, holding.quantity))
+      mkt.asset(asset.resource, asset.quantity))
   ])
 }
 
@@ -136,7 +136,7 @@ const AccountDetailPage = {
 
   view (vnode) {
     const publicKey = _.get(vnode.state, 'account.publicKey', '')
-    const holdings = _.get(vnode.state, 'account.holdings', [])
+    const assets = _.get(vnode.state, 'account.assets', [])
 
     const profileContent = layout.row([
       editField(vnode.state, 'Email', 'email'),
@@ -150,10 +150,10 @@ const AccountDetailPage = {
         publicKey === api.getPublicKey() ? profileContent : null,
         layout.row(staticField('Public Key', publicKey)),
         layout.row(staticField(
-          'Holdings',
-          holdings.length > 0
-            ? holdings.map(holdingRow)
-            : m('em', 'this account currently has no holdings'))))
+          'Assets',
+          assets.length > 0
+            ? assets.map(assetRow)
+            : m('em', 'this account currently has no assets'))))
     ]
   }
 }

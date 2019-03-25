@@ -15,13 +15,13 @@
 
 syntax = "proto3";
 
-import "rule.proto";
-
 message Asset {
-    string name = 1;
-    string description = 2;
-    repeated string owners = 3;
-    repeated Rule rules = 4;
+    string id = 1;
+    string label = 2;
+    string description = 3;
+    string account = 4;
+    string resource = 5;
+    sint64 quantity = 6;
 }
 
 message AssetContainer {

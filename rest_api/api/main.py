@@ -34,10 +34,10 @@ from sawtooth_rest_api.messaging import Connection
 from zmq.asyncio import ZMQEventLoop
 
 from api.accounts import ACCOUNTS_BP
-from api.assets import ASSETS_BP
+from api.resources import RESOURCES_BP
 from api.authorization import AUTH_BP
 from api.errors import ERRORS_BP
-from api.holdings import HOLDINGS_BP
+from api.assets import ASSETS_BP
 from api.offers import OFFERS_BP
 
 
@@ -171,10 +171,10 @@ def load_config(app):  # pylint: disable=too-many-branches
 def main():
     app = Sanic(__name__)
     app.blueprint(ACCOUNTS_BP)
-    app.blueprint(ASSETS_BP)
+    app.blueprint(RESOURCES_BP)
     app.blueprint(AUTH_BP)
     app.blueprint(ERRORS_BP)
-    app.blueprint(HOLDINGS_BP)
+    app.blueprint(ASSETS_BP)
     app.blueprint(OFFERS_BP)
 
     load_config(app)

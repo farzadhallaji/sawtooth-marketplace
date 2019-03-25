@@ -21,15 +21,15 @@ from marketplace_addressing.addresser import AddressSpace
 
 TABLE_NAMES = {
     AddressSpace.ACCOUNT: 'accounts',
+    AddressSpace.RESOURCE: 'resources',
     AddressSpace.ASSET: 'assets',
-    AddressSpace.HOLDING: 'holdings',
     AddressSpace.OFFER: 'offers'
 }
 
 SECONDARY_INDEXES = {
     AddressSpace.ACCOUNT: 'public_key',
-    AddressSpace.ASSET: 'name',
-    AddressSpace.HOLDING: 'id',
+    AddressSpace.RESOURCE: 'name',
+    AddressSpace.ASSET: 'id',
     AddressSpace.OFFER: 'id'
 }
 

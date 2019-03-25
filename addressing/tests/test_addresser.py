@@ -21,15 +21,15 @@ from marketplace_addressing import addresser
 
 class AddresserTest(unittest.TestCase):
 
-    def test_asset_address(self):
+    def test_resource_address(self):
 
-        asset_address = addresser.make_asset_address(uuid4().hex)
+        resource_address = addresser.make_resource_address(uuid4().hex)
 
-        self.assertEqual(len(asset_address), 70, "The address is valid.")
+        self.assertEqual(len(resource_address), 70, "The address is valid.")
 
-        self.assertEqual(addresser.address_is(asset_address),
-                         addresser.AddressSpace.ASSET,
-                         "The address is correctly identified as an Asset.")
+        self.assertEqual(addresser.address_is(resource_address),
+                         addresser.AddressSpace.RESOURCE,
+                         "The address is correctly identified as an Resource.")
 
     def test_offer_address(self):
         offer_address = addresser.make_offer_address(uuid4().hex)
@@ -49,14 +49,14 @@ class AddresserTest(unittest.TestCase):
                          addresser.AddressSpace.ACCOUNT,
                          "The address is correctly identified as an Account.")
 
-    def test_holding_address(self):
-        holding_address = addresser.make_holding_address(uuid4().hex)
+    def test_asset_address(self):
+        asset_address = addresser.make_asset_address(uuid4().hex)
 
-        self.assertEqual(len(holding_address), 70, "The address is valid.")
+        self.assertEqual(len(asset_address), 70, "The address is valid.")
 
-        self.assertEqual(addresser.address_is(holding_address),
-                         addresser.AddressSpace.HOLDING,
-                         "The address is correctly identified as an Holding.")
+        self.assertEqual(addresser.address_is(asset_address),
+                         addresser.AddressSpace.ASSET,
+                         "The address is correctly identified as an Asset.")
 
     def test_offer_history_address(self):
         offer_history_address = addresser.make_offer_account_address(

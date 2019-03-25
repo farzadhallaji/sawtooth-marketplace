@@ -19,8 +19,8 @@ from sawtooth_sdk.processor.handler import TransactionHandler
 from marketplace_addressing import addresser
 
 from marketplace_processor.account import account_creation
+from marketplace_processor.resource import resource_creation
 from marketplace_processor.asset import asset_creation
-from marketplace_processor.holding import holding_creation
 from marketplace_processor.offer import offer_acceptance
 from marketplace_processor.offer import offer_closure
 from marketplace_processor.offer import offer_creation
@@ -52,14 +52,14 @@ class MarketplaceHandler(TransactionHandler):
                 payload.create_account(),
                 header=transaction.header,
                 state=state)
+        elif payload.is_create_resource():
+            resource_creation.handle_resource_creation(
+                payload.create_resource(),
+                header=transaction.header,
+                state=state)
         elif payload.is_create_asset():
             asset_creation.handle_asset_creation(
                 payload.create_asset(),
-                header=transaction.header,
-                state=state)
-        elif payload.is_create_holding():
-            holding_creation.handle_holding_creation(
-                payload.create_holding(),
                 header=transaction.header,
                 state=state)
         elif payload.is_create_offer():

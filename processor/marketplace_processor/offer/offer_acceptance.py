@@ -31,14 +31,14 @@ def handle_accept_offer(accept_offer, header, state):
     Raises:
         - InvalidTransaction
             - The Offer does not exist or is not Open
-            - The receiver source Holding does not exist.
-            - The receiver target Holding does not exist.
-            - The offerer source holding asset does not match the
-              receiver target holding asset.
-            - The offerer target holding asset does not match the
-              the receiver source holding asset.
-            - The receiver source holding does not have the required quantity.
-            - The offerer source holding does not have the required quantity.
+            - The receiver source Asset does not exist.
+            - The receiver target Asset does not exist.
+            - The offerer source asset resource does not match the
+              receiver target asset resource.
+            - The offerer target asset resource does not match the
+              the receiver source asset resource.
+            - The receiver source asset does not have the required quantity.
+            - The offerer source asset does not have the required quantity.
     """
 
     offer = state.get_offer(identifier=accept_offer.id)
@@ -52,24 +52,24 @@ def handle_accept_offer(accept_offer, header, state):
     offer_accept.validate_once_per_account()
     offer_accept.validate_accounts_limited_to()
 
-    # The holding ids referernce Holdings.
-    offer_accept.validate_output_holding_exists()
+    # The asset ids referernce Assets.
+    offer_accept.validate_output_asset_exists()
 
-    offer_accept.validate_input_holding_exists()
+    offer_accept.validate_input_asset_exists()
 
-    # The assets match for the Holdings
-    offer_accept.validate_input_holding_assets()
+    # The resources match for the Assets
+    offer_accept.validate_input_asset_resources()
 
-    offer_accept.validate_output_holding_assets()
+    offer_accept.validate_output_asset_resources()
 
     calculator = AcceptOfferCalculator(offer=offer, count=accept_offer.count)
 
-    # There is enough in each Holding to make the transaction.
+    # There is enough in each Asset to make the transaction.
     offer_accept.validate_output_enough(calculator.output_quantity())
 
     offer_accept.validate_input_enough(calculator.input_quantity())
 
-    # Handle incrementing and decrementing the Holdings' quantity
+    # Handle incrementing and decrementing the Assets' quantity
     offer_accept.handle_offerer_source(calculator.input_quantity())
     offer_accept.handle_offerer_target(calculator.output_quantity())
     offer_accept.handle_receiver_source(calculator.output_quantity())
@@ -109,79 +109,79 @@ class OfferAcceptance(object):
 
         self._state = state
 
-        source_hldng = state.get_holding(offer.source)
-        target_hldng = state.get_holding(
+        source_hldng = state.get_asset(offer.source)
+        target_hldng = state.get_asset(
             offer.target) if offer.target else None
-        asset = state.get_asset(target_hldng.asset) if target_hldng else None
+        resource = state.get_resource(target_hldng.resource) if target_hldng else None
 
         self._offerer = _OfferParticipant(
             source=source_hldng,
             target=target_hldng,
-            source_asset=state.get_asset(source_hldng.asset),
-            target_asset=asset)
+            source_resource=state.get_resource(source_hldng.resource),
+            target_resource=resource)
 
-        source = state.get_holding(accept_offer.source) \
+        source = state.get_asset(accept_offer.source) \
             if accept_offer.source else None
-        src_asset = state.get_asset(
-            source.asset) if source else None
-        target = state.get_holding(accept_offer.target)
+        src_resource = state.get_resource(
+            source.resource) if source else None
+        target = state.get_asset(accept_offer.target)
 
         self._receiver = _OfferParticipant(
             source=source,
-            source_asset=src_asset,
+            source_resource=src_resource,
             target=target,
-            target_asset=state.get_asset(target.asset))
+            target_resource=state.get_resource(target.resource))
 
-    def validate_output_holding_exists(self):
+    def validate_output_asset_exists(self):
         if self._offer.target and self._accept_offer.source:
             if self._offerer.target and not self._receiver.source:
                 raise InvalidTransaction(
-                    "Failed to accept offer, holding specified as source,{},"
+                    "Failed to accept offer, asset specified as source,{},"
                     " does not exist.".format(self._accept_offer.source))
 
-    def validate_input_holding_exists(self):
+    def validate_input_asset_exists(self):
         if not self._receiver.target:
             raise InvalidTransaction(
-                "Failed to accept offer, holding specified as target, {},"
+                "Failed to accept offer, asset specified as target, {},"
                 " does not exist".format(self._accept_offer.target))
 
-    def validate_input_holding_assets(self):
-        if not self._offerer.source.asset == self._receiver.target.asset:
+    def validate_input_asset_resources(self):
+        if not self._offerer.source.resource == self._receiver.target.resource:
             raise InvalidTransaction(
-                "Failed to accept offer, expected Holding asset {}, got "
-                "asset {}".format(self._offerer.source.asset,
-                                  self._receiver.target.asset))
+                "Failed to accept offer, expected Asset resource {}, got "
+                "resource {}".format(self._offerer.source.resource,
+                                  self._receiver.target.resource))
 
-    def validate_output_holding_assets(self):
+    def validate_output_asset_resources(self):
         if self._offer.target \
                 and self._offerer.target \
                 and not \
-                self._offerer.target.asset == self._receiver.source.asset:
+                self._offerer.target.resource == self._receiver.source.resource:
             raise InvalidTransaction(
-                "Failed to accept offer, expected Holding asset {}, got "
-                "asset {}.".format(self._offerer.target.asset,
-                                   self._receiver.source.asset))
+                "Failed to accept offer, expected Asset resource {}, got "
+                "resource {}.".format(self._offerer.target.resource,
+                                   self._receiver.source.resource))
 
     def validate_output_enough(self, output_quantity):
-        if self._accept_offer.source and not _holding_is_infinite(
-                self._receiver.source_asset,
+        if self._accept_offer.source and not _asset_is_infinite(
+                self._receiver.source_resource,
                 self._receiver.source.account) and \
                 output_quantity > self._receiver.source.quantity:
             raise InvalidTransaction(
                 "Failed to accept offer, needed quantity {}, but only had {} "
                 "of {}".format(output_quantity,
                                self._receiver.source.quantity,
-                               self._receiver.source.asset))
+                               self._receiver.source.resource))
 
     def validate_input_enough(self, input_quantity):
-        if not _holding_is_infinite(self._offerer.source_asset,
+        if not _asset_is_infinite(self._offerer.source_resource,
                                     self._offerer.source.account) and \
                 input_quantity > self._offerer.source.quantity:
             raise InvalidTransaction(
                 "Failed to accept offer, needed quantity {}, but only had {} "
                 "of {}".format(input_quantity,
                                self._offerer.source.quantity,
-                               self._offerer.source.asset))
+                               self._offerer.source.resource))
 
     def validate_once_per_account(self):
         if _exchange_once_per_account(self._offer):
@@ -210,28 +210,28 @@ class OfferAcceptance(object):
                         self._header.signer_public_key))
 
     def handle_offerer_source(self, input_quantity):
-        if not _holding_is_infinite(self._offerer.source_asset,
+        if not _asset_is_infinite(self._offerer.source_resource,
                                     self._offerer.source.account):
-            self._state.change_holding_quantity(
+            self._state.change_asset_quantity(
                 self._offerer.source.id,
                 self._offerer.source.quantity - input_quantity)
 
     def handle_offerer_target(self, output_quantity):
         if self._offer.target:
-            self._state.change_holding_quantity(
+            self._state.change_asset_quantity(
                 self._offerer.target.id,
                 self._offerer.target.quantity + output_quantity)
 
     def handle_receiver_source(self, output_quantity):
-        if self._accept_offer.source and not _holding_is_infinite(
-                self._receiver.source_asset,
+        if self._accept_offer.source and not _asset_is_infinite(
+                self._receiver.source_resource,
                 self._receiver.source.account):
-            self._state.change_holding_quantity(
+            self._state.change_asset_quantity(
                 self._receiver.source.id,
                 self._receiver.source.quantity - output_quantity)
 
     def handle_receiver_target(self, input_quantity):
-        self._state.change_holding_quantity(
+        self._state.change_asset_quantity(
             self._receiver.target.id,
             self._receiver.target.quantity + input_quantity)
 
@@ -278,48 +278,48 @@ def _exchange_once_per_account(offer):
     return False
 
 
-def _holding_is_infinite(asset, owner):
-    if asset and (_has_rule(
-            asset.rules,
-            rule_pb2.Rule.ALL_HOLDINGS_INFINITE) or
+def _asset_is_infinite(resource, owner):
+    if resource and (_has_rule(
+            resource.rules,
+            rule_pb2.Rule.ALL_ASSETS_INFINITE) or
                   _has_rule(
-                      asset.rules,
-                      rule_pb2.Rule.OWNER_HOLDINGS_INFINITE) and
-                  owner in asset.owners):
+                      resource.rules,
+                      rule_pb2.Rule.OWNER_ASSETS_INFINITE) and
+                  owner in resource.owners):
         return True
     return False
 
 
 class _OfferParticipant(object):
 
-    def __init__(self, source, target, source_asset, target_asset):
+    def __init__(self, source, target, source_resource, target_resource):
         """Constructor.
 
         Args:
-            source (Holding): The source Holding.
-            target (Holding): The target Holding.
-            source_asset (Asset): The source Asset.
-            target_asset (Asset): The target Asset.
+            source (Asset): The source Asset.
+            target (Asset): The target Asset.
+            source_resource (Resource): The source Resource.
+            target_resource (Resource): The target Resource.
         """
 
         self._source = source
-        self._source_asset = source_asset
+        self._source_resource = source_resource
 
         self._target = target
-        self._target_asset = target_asset
+        self._target_resource = target_resource
 
     @property
     def source(self):
         return self._source
 
     @property
-    def source_asset(self):
-        return self._source_asset
+    def source_resource(self):
+        return self._source_resource
 
     @property
     def target(self):
         return self._target
 
     @property
-    def target_asset(self):
-        return self._target_asset
+    def target_resource(self):
+        return self._target_resource

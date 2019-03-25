@@ -48,17 +48,17 @@ def setup_db(host, port, name):
         r.db(name).table_create('accounts', primary_key='delta_id').run(conn)
         r.db(name).table('accounts').index_create('public_key').run(conn)
 
-        print('Creating table: assets')
-        r.db(name).table_create('assets', primary_key='delta_id').run(conn)
-        r.db(name).table('assets').index_create('name').run(conn)
+        print('Creating table: resources')
+        r.db(name).table_create('resources', primary_key='delta_id').run(conn)
+        r.db(name).table('resources').index_create('name').run(conn)
 
         print('Creating table: offers')
         r.db(name).table_create('offers', primary_key='delta_id').run(conn)
         r.db(name).table('offers').index_create('id').run(conn)
 
-        print('Creating table: holdings')
-        r.db(name).table_create('holdings', primary_key='delta_id').run(conn)
-        r.db(name).table('holdings').index_create('id').run(conn)
+        print('Creating table: assets')
+        r.db(name).table_create('assets', primary_key='delta_id').run(conn)
+        r.db(name).table('assets').index_create('id').run(conn)
 
         print('Creating table: blocks')
         r.db(name).table_create('blocks', primary_key='block_num').run(conn)

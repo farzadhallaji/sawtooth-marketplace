@@ -15,15 +15,15 @@
 
 syntax = "proto3";
 
-message Holding {
-    string id = 1;
-    string label = 2;
-    string description = 3;
-    string account = 4;
-    string asset = 5;
-    sint64 quantity = 6;
+import "rule.proto";
+
+message Resource {
+    string name = 1;
+    string description = 2;
+    repeated string owners = 3;
+    repeated Rule rules = 4;
 }
 
-message HoldingContainer {
-    repeated Holding entries = 1;
+message ResourceContainer {
+    repeated Resource entries = 1;
 }

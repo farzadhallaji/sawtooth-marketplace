@@ -1,7 +1,7 @@
 # Sawtooth Marketplace
 
 _Sawtooth Marketplace_ is a blockchain application built on Hyperledger
-Sawtooth, allowing users to exchange quantities of customized "Assets" with
+Sawtooth, allowing users to exchange quantities of customized "Resources" with
 other users on the blockchain. This repo contains a number of components which
 together with a _Hyperledger Sawtooth_ validator, will run a Sawtooth
 blockchain and provide a simple RESTful API to interact with it. The components
@@ -65,7 +65,7 @@ docker exec -it market-shell bash
 
 This will open a bash terminal within the shell container, with the `bin/`
 directory in the PATH, and all dependencies installed. Now to seed
-_SawbuckManager_ with all the needed Offers and Assets run:
+_SawbuckManager_ with all the needed Offers and Resources run:
 
 ```bash
 mktadm seed --url market-rest-api:8000 --data sawbuck_app/app_data.yaml

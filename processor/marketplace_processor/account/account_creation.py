@@ -37,4 +37,4 @@ def handle_account_creation(create_account, header, state):
         public_key=header.signer_public_key,
         label=create_account.label,
         description=create_account.description,
-        holdings=[])
+        assets=[])

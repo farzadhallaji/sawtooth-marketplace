@@ -20,9 +20,9 @@ const m = require('mithril')
 const layout = require('./layout')
 
 /**
- * Returns a simple stylized card element for displaying a holding
+ * Returns a simple stylized card element for displaying a asset
  */
-const holding = (header, body, color = 'success') => {
+const asset = (header, body, color = 'success') => {
   return m(`.card.border-${color}`, [
     m(`.card-header.text-${color}.border-${color}.text-center`,
       {style: 'line-height:0.8;'},
@@ -33,16 +33,16 @@ const holding = (header, body, color = 'success') => {
 }
 
 /**
- * Returns two holding cards in a row with a large arrow between
+ * Returns two asset cards in a row with a large arrow between
  */
 const bifold = (left, right, direction = 'left') => {
   return m('.row.mb-5', [
     m('.col-md-5',
-      holding(left.header, left.body, left.color)),
+      asset(left.header, left.body, left.color)),
     m('.col-md-2.text-center',
       m('.my-auto', layout.icon(`arrow-${direction}`, {height: 60}))),
     m('.col-md-5',
-      holding(right.header, right.body, right.color))
+      asset(right.header, right.body, right.color))
   ])
 }
 
@@ -58,7 +58,7 @@ const rule = ({ type, value }) => {
 }
 
 module.exports = {
-  holding,
+  asset,
   bifold,
   rule
 }

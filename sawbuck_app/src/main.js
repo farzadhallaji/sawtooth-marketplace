@@ -26,8 +26,8 @@ const api = require('./services/api')
 const navigation = require('./components/navigation')
 
 const AccountDetailPage = require('./views/account_detail')
-const AssetDetailPage = require('./views/asset_detail')
-const AssetListPage = require('./views/asset_list')
+const ResourceDetailPage = require('./views/resource_detail')
+const ResourceListPage = require('./views/resource_list')
 const LoginForm = require('./views/login_form')
 const OfferDetailPage = require('./views/offer_detail')
 const OfferListPage = require('./views/offer_list')
@@ -47,7 +47,7 @@ const Layout = {
 
 const loggedInNav = () => {
   const links = [
-    ['/assets', 'View Assets'],
+    ['/resources', 'View Resources'],
     ['/offers', 'View Offers']
   ]
   return m(navigation.Navbar, {}, [
@@ -59,7 +59,7 @@ const loggedInNav = () => {
 
 const loggedOutNav = () => {
   const links = [
-    ['/assets', 'View Assets'],
+    ['/resources', 'View Resources'],
     ['/offers', 'View Offers']
   ]
   return m(navigation.Navbar, {}, [
@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     '/': resolve(OfferListPage),
     '/account': { onmatch: userAccount },
     '/accounts/:publicKey': resolve(AccountDetailPage),
-    '/assets': resolve(AssetListPage),
-    '/assets/:name': resolve(AssetDetailPage),
+    '/resources': resolve(ResourceListPage),
+    '/resources/:name': resolve(ResourceDetailPage),
     '/login': resolve(LoginForm),
     '/logout': { onmatch: logout },
     '/offers': resolve(OfferListPage),

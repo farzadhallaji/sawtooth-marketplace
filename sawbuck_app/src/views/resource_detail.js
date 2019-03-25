@@ -40,24 +40,24 @@ const offerButton = (name, disabled, key = 'source') => {
  * Displays information for a particular Account.
  * The information can be edited if the user themself.
  */
-const AssetDetailPage = {
+const ResourceDetailPage = {
   oninit (vnode) {
     const safeName = window.encodeURI(vnode.attrs.name)
-    Promise.all([acct.getUserAccount(), api.get(`assets/${safeName}`)])
-      .then(([ user, asset ]) => {
-        vnode.state.asset = asset
+    Promise.all([acct.getUserAccount(), api.get(`resources/${safeName}`)])
+      .then(([ user, resource ]) => {
+        vnode.state.resource = resource
 
         if (user) {
-          const quantities = acct.getAssetQuantities(user)
+          const quantities = acct.getResourceQuantities(user)
           vnode.state.user = _.assign({ quantities }, user)
 
-          if (asset.owners.find(owner => user.publicKey === owner)) {
+          if (resource.owners.find(owner => user.publicKey === owner)) {
             return user
           }
         }
 
-        if (asset.owners.length > 0) {
-          return api.get(`accounts/${asset.owners[0]}`)
+        if (resource.owners.length > 0) {
+          return api.get(`accounts/${resource.owners[0]}`)
         }
       })
       .then(owner => { if (owner) vnode.state.owner = owner })
@@ -65,19 +65,19 @@ const AssetDetailPage = {
   },
 
   view (vnode) {
-    const asset = _.get(vnode.state, 'asset', { rules: [], owners: [] })
+    const resource = _.get(vnode.state, 'resource', { rules: [], owners: [] })
     const owner = _.get(vnode.state, 'owner', {})
 
     const user = vnode.state.user
     const offerDisabled = !user ||
-      !user.quantities[asset.name] ||
-      (asset.rules.find(({ type }) => type === 'NOT_TRANSFERABLE') &&
-        !asset.owners.find(owner => owner === user.publicKey))
+      !user.quantities[resource.name] ||
+      (resource.rules.find(({ type }) => type === 'NOT_TRANSFERABLE') &&
+        !resource.owners.find(owner => owner === user.publicKey))
     const requestDisabled = !user
 
     return [
-      layout.title(asset.name),
-      layout.description(_.get(vnode.state, 'asset.description', '')),
+      layout.title(resource.name),
+      layout.description(_.get(vnode.state, 'resource.description', '')),
       m('.container',
         layout.row(layout.labeledField(
           'Administered by',
@@ -87,14 +87,14 @@ const AssetDetailPage = {
           }, owner.label || owner.publicKey))),
         layout.row(layout.labeledField(
           'Rules',
-          asset.rules.length > 0
-            ? layout.sectionedRows(asset.rules.map(mkt.rule))
-            : m('em', 'this asset has no special rules'))),
+          resource.rules.length > 0
+            ? layout.sectionedRows(resource.rules.map(mkt.rule))
+            : m('em', 'this resource has no special rules'))),
         m('.row.text-center.mt-5',
-          m('.col-md.m-3', offerButton(asset.name, offerDisabled)),
-          m('.col-md.m-3', offerButton(asset.name, requestDisabled, 'target'))))
+          m('.col-md.m-3', offerButton(resource.name, offerDisabled)),
+          m('.col-md.m-3', offerButton(resource.name, requestDisabled, 'target'))))
     ]
   }
 }
 
-module.exports = AssetDetailPage
+module.exports = ResourceDetailPage

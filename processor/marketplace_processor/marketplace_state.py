@@ -15,8 +15,8 @@
 
 from marketplace_addressing import addresser
 from marketplace_processor.protobuf import account_pb2
+from marketplace_processor.protobuf import resource_pb2
 from marketplace_processor.protobuf import asset_pb2
-from marketplace_processor.protobuf import holding_pb2
 from marketplace_processor.protobuf import offer_pb2
 from marketplace_processor.protobuf import offer_history_pb2
 from marketplace_processor.protobuf import rule_pb2
@@ -94,11 +94,11 @@ class MarketplaceState(object):
             state_entries_send,
             self._timeout)
 
-    def _return_offer_rules(self, holding_id,):
-        holding_addr = addresser.make_holding_address(holding_id)
-        holding = self._get_holding(holding_addr, holding_id)
-        asset = self.get_asset(holding.asset)
-        return [r for r in asset.rules if r.type in OFFER_RULES]
+    def _return_offer_rules(self, asset_id,):
+        asset_addr = addresser.make_asset_address(asset_id)
+        asset = self._get_asset(asset_addr, asset_id)
+        resource = self.get_resource(asset.resource)
+        return [r for r in resource.rules if r.type in OFFER_RULES]
 
     def close_offer(self, identifier):
         address = addresser.make_offer_address(offer_id=identifier)
@@ -118,110 +118,110 @@ class MarketplaceState(object):
             state_entries_send,
             self._timeout)
 
-    def get_holding(self, identifier):
-        address = addresser.make_holding_address(holding_id=identifier)
+    def get_asset(self, identifier):
+        address = addresser.make_asset_address(asset_id=identifier)
 
         self._state_entries.extend(self._context.get_state(
             addresses=[address],
             timeout=self._timeout))
 
-        return self._get_holding(address=address, identifier=identifier)
+        return self._get_asset(address=address, identifier=identifier)
 
-    def _get_holding(self, address, identifier):
-
-        container = _get_holding_container(self._state_entries, address)
-
-        holding = None
-        try:
-            holding = _get_holding_from_container(container, identifier)
-        except KeyError:
-            # Fine with returning None
-            pass
-        return holding
-
-    def set_holding(self,
-                    identifier,
-                    label,
-                    description,
-                    account,
-                    asset,
-                    quantity):
-        address = addresser.make_holding_address(holding_id=identifier)
-        container = _get_holding_container(self._state_entries, address)
-
-        try:
-            holding = _get_holding_from_container(container, identifier)
-        except KeyError:
-            holding = container.entries.add()
-
-        holding.id = identifier
-        holding.label = label
-        holding.description = description
-        holding.account = account
-        holding.asset = asset
-        holding.quantity = quantity
-
-        state_entries_send = {}
-        state_entries_send[address] = container.SerializeToString()
-        return self._context.set_state(
-            state_entries_send,
-            self._timeout)
-
-    def change_holding_quantity(self,
-                                identifier,
-                                new_quantity):
-        address = addresser.make_holding_address(holding_id=identifier)
-        container = _get_holding_container(self._state_entries, address)
-
-        try:
-            holding = _get_holding_from_container(container, identifier)
-        except KeyError:
-            holding = container.entries.add()
-
-        holding.quantity = new_quantity
-
-        state_entries_send = {}
-        state_entries_send[address] = container.SerializeToString()
-
-        return self._context.set_state(
-            state_entries_send,
-            self._timeout)
-
-    def get_asset(self, name):
-        address = addresser.make_asset_address(asset_id=name)
-
-        self._state_entries.extend(self._context.get_state(
-            addresses=[address],
-            timeout=self._timeout))
-
-        return self._get_asset(address=address, name=name)
-
-    def _get_asset(self, address, name):
+    def _get_asset(self, address, identifier):
 
         container = _get_asset_container(self._state_entries, address)
 
         asset = None
         try:
-            asset = _get_asset_from_container(container, name)
+            asset = _get_asset_from_container(container, identifier)
         except KeyError:
-            # We are fine with returning None for an asset that doesn't exist
+            # Fine with returning None
             pass
         return asset
 
-    def set_asset(self, name, description, owners, rules):
-        address = addresser.make_asset_address(name)
-
+    def set_asset(self,
+                    identifier,
+                    label,
+                    description,
+                    account,
+                    resource,
+                    quantity):
+        address = addresser.make_asset_address(asset_id=identifier)
         container = _get_asset_container(self._state_entries, address)
 
         try:
-            asset = _get_asset_from_container(container, name)
+            asset = _get_asset_from_container(container, identifier)
         except KeyError:
             asset = container.entries.add()
 
-        asset.name = name
+        asset.id = identifier
+        asset.label = label
         asset.description = description
-        asset.owners.extend(owners)
-        asset.rules.extend(rules)
+        asset.account = account
+        asset.resource = resource
+        asset.quantity = quantity
+
+        state_entries_send = {}
+        state_entries_send[address] = container.SerializeToString()
+        return self._context.set_state(
+            state_entries_send,
+            self._timeout)
+
+    def change_asset_quantity(self,
+                                identifier,
+                                new_quantity):
+        address = addresser.make_asset_address(asset_id=identifier)
+        container = _get_asset_container(self._state_entries, address)
+
+        try:
+            asset = _get_asset_from_container(container, identifier)
+        except KeyError:
+            asset = container.entries.add()
+
+        asset.quantity = new_quantity
+
+        state_entries_send = {}
+        state_entries_send[address] = container.SerializeToString()
+
+        return self._context.set_state(
+            state_entries_send,
+            self._timeout)
+
+    def get_resource(self, name):
+        address = addresser.make_resource_address(resource_id=name)
+
+        self._state_entries.extend(self._context.get_state(
+            addresses=[address],
+            timeout=self._timeout))
+
+        return self._get_resource(address=address, name=name)
+
+    def _get_resource(self, address, name):
+
+        container = _get_resource_container(self._state_entries, address)
+
+        resource = None
+        try:
+            resource = _get_resource_from_container(container, name)
+        except KeyError:
+            # We are fine with returning None for an resource that doesn't exist
+            pass
+        return resource
+
+    def set_resource(self, name, description, owners, rules):
+        address = addresser.make_resource_address(name)
+
+        container = _get_resource_container(self._state_entries, address)
+
+        try:
+            resource = _get_resource_from_container(container, name)
+        except KeyError:
+            resource = container.entries.add()
+
+        resource.name = name
+        resource.description = description
+        resource.owners.extend(owners)
+        resource.rules.extend(rules)
 
         state_entries_send = {}
         state_entries_send[address] = container.SerializeToString()
@@ -248,7 +248,7 @@ class MarketplaceState(object):
             pass
         return account
 
-    def set_account(self, public_key, label, description, holdings):
+    def set_account(self, public_key, label, description, assets):
         address = addresser.make_account_address(account_id=public_key)
 
         container = _get_account_container(self._state_entries, address)
@@ -263,8 +263,8 @@ class MarketplaceState(object):
         account.public_key = public_key
         account.label = label
         account.description = description
-        for holding in holdings:
-            account.holdings.append(holding)
+        for asset in assets:
+            account.assets.append(asset)
 
         state_entries_send = {}
         state_entries_send[address] = container.SerializeToString()
@@ -272,7 +272,7 @@ class MarketplaceState(object):
             state_entries_send,
             self._timeout)
 
-    def add_holding_to_account(self, public_key, holding_id):
+    def add_asset_to_account(self, public_key, asset_id):
         address = addresser.make_account_address(account_id=public_key)
 
         container = _get_account_container(self._state_entries, address)
@@ -284,7 +284,7 @@ class MarketplaceState(object):
         except KeyError:
             account = container.entries.add()
 
-        account.holdings.append(holding_id)
+        account.assets.append(asset_id)
 
         state_entries_send = {}
         state_entries_send[address] = container.SerializeToString()
@@ -409,25 +409,6 @@ def _get_offer_from_container(container, offer_id):
         "Offer with id {} is not in container".format(offer_id))
 
 
-def _get_holding_container(state_entries, address):
-    try:
-        entry = _find_in_state(state_entries, address)
-        container = holding_pb2.HoldingContainer()
-        container.ParseFromString(entry.data)
-    except KeyError:
-        container = holding_pb2.HoldingContainer()
-
-    return container
-
-
-def _get_holding_from_container(container, holding_id):
-    for holding in container.entries:
-        if holding.id == holding_id:
-            return holding
-    raise KeyError(
-        "Holding with id {} is not in container".format(holding_id))
-
-
 def _get_asset_container(state_entries, address):
     try:
         entry = _find_in_state(state_entries, address)
@@ -435,15 +416,34 @@ def _get_asset_container(state_entries, address):
         container.ParseFromString(entry.data)
     except KeyError:
         container = asset_pb2.AssetContainer()
+
     return container
 
 
-def _get_asset_from_container(container, name):
+def _get_asset_from_container(container, asset_id):
     for asset in container.entries:
-        if asset.name == name:
+        if asset.id == asset_id:
             return asset
     raise KeyError(
-        "Asset with name {} is not in container".format(name))
+        "Asset with id {} is not in container".format(asset_id))
+
+
+def _get_resource_container(state_entries, address):
+    try:
+        entry = _find_in_state(state_entries, address)
+        container = resource_pb2.ResourceContainer()
+        container.ParseFromString(entry.data)
+    except KeyError:
+        container = resource_pb2.ResourceContainer()
+    return container
+
+
+def _get_resource_from_container(container, name):
+    for resource in container.entries:
+        if resource.name == name:
+            return resource
+    raise KeyError(
+        "Resource with name {} is not in container".format(name))
 
 
 def _get_account_container(state_entries, address):

@@ -19,20 +19,20 @@ ACCOUNTS:
     description: The sole issuing authoririty for Minicoins
     email: minicoin@minicoin.example
     password: password
-    ASSETS:
+    RESOURCES:
       - name: Minicoin
         description: The cryptocurrency that fits in your pocket
         rules:
-          - type: OWNER_HOLDINGS_INFINITE
-    HOLDINGS:
+          - type: OWNER_ASSETS_INFINITE
+    ASSETS:
       - label: Minicoin Source
         description: An unlimited supply new minicoin
-        asset: Minicoin
+        resource: Minicoin
         quantity: 9007199254740991
     OFFERS:
       - label: Minicoin Provision
         description: A one time payout of 1 million minicoin
-        source: $REF=HOLDINGS[label:Minicoin Source].id
+        source: $REF=ASSETS[label:Minicoin Source].id
         sourceQuantity: 1000000
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
@@ -42,34 +42,34 @@ ACCOUNTS:
     description: The source for all your Sawtooth products and services
     email: sawtooth@hyperledger.org
     password: password
-    ASSETS:
+    RESOURCES:
       - name: Sawbuck
         description: Sawtooth loyalty points, better than cryptocurrency!
         rules:
-          - type: OWNER_HOLDINGS_INFINITE
+          - type: OWNER_ASSETS_INFINITE
       - name: Bronze Status
         description: |
           You just started collecting Sawbucks, but you have a bright future.
         rules:
-          - type: ALL_HOLDINGS_INFINITE
+          - type: ALL_ASSETS_INFINITE
           - type: NOT_TRANSFERABLE
       - name: Silver Status
         description: |
           You're moving up, but don't yet have the recognition you crave.
         rules:
-          - type: ALL_HOLDINGS_INFINITE
+          - type: ALL_ASSETS_INFINITE
           - type: NOT_TRANSFERABLE
       - name: Gold Status
         description: You're a serious Sawbuck contender.
         rules:
-          - type: ALL_HOLDINGS_INFINITE
+          - type: ALL_ASSETS_INFINITE
           - type: NOT_TRANSFERABLE
       - name: Platinum Status
         description: |
           Only the most loyal and dedicated blockchain fans
           will achieve this honor.
         rules:
-          - type: ALL_HOLDINGS_INFINITE
+          - type: ALL_ASSETS_INFINITE
           - type: NOT_TRANSFERABLE
       - name: Coupon for one Sawtooth Sticker
         description: |
@@ -84,104 +84,104 @@ ACCOUNTS:
       - name: Coupon for ten free fork resolutions
         description: You got forks? Let us resolve them.
         rules: []
-    HOLDINGS:
+    ASSETS:
       - label: Sawbucket
         description: An unlimited supply of precious precious Sawbucks
-        asset: Sawbuck
+        resource: Sawbuck
         quantity: 9007199254740991
       - label: Bronze Dispenser
         description: An unlimited supply of Bronze Statuses
-        asset: Bronze Status
+        resource: Bronze Status
         quantity: 9007199254740991
       - label: Silver Dispenser
         description: An unlimited supply of Silver Statuses
-        asset: Silver Status
+        resource: Silver Status
         quantity: 9007199254740991
       - label: Gold Dispenser
         description: An unlimited supply of Gold Statuses
-        asset: Gold Status
+        resource: Gold Status
         quantity: 9007199254740991
       - label: Platinum Dispenser
         description: An unlimited supply of Platinum Statuses
-        asset: Platinum Status
+        resource: Platinum Status
         quantity: 9007199254740991
       - label: Sticker Supply
         description: Coupons for a limited run of 1000 Sawtooth stickers
-        asset: Coupon for one Sawtooth Sticker
+        resource: Coupon for one Sawtooth Sticker
         quantity: 1000
       - label: Blockchain Coupons
         description: Coupons to be redeemed for free blockchains
-        asset: Coupon for a free blockchain
+        resource: Coupon for a free blockchain
         quantity: 10000
       - label: Fork Coupons
         description: Use these to resolve your forks
-        asset: Coupon for ten free fork resolutions
+        resource: Coupon for ten free fork resolutions
         quantity: 100000
     OFFERS:
       - label: Signup Bonus!
         description: You get 1000 Sawbucks, just for signing up!
-        source: $REF=HOLDINGS[label:Sawbucket].id
+        source: $REF=ASSETS[label:Sawbucket].id
         sourceQuantity: 1000
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
       - label: Claim Bronze Status
         description: Show off your Sawtooth loyalty with Bronze Status.
-        source: $REF=HOLDINGS[label:Bronze Dispenser].id
+        source: $REF=ASSETS[label:Bronze Dispenser].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 100
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
       - label: Claim Silver Status
         description: Show off your Sawtooth loyalty with Silver Status.
-        source: $REF=HOLDINGS[label:Silver Dispenser].id
+        source: $REF=ASSETS[label:Silver Dispenser].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 1000
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
       - label: Claim Gold Status
         description: Show off your Sawtooth loyalty with Gold Status.
-        source: $REF=HOLDINGS[label:Gold Dispenser].id
+        source: $REF=ASSETS[label:Gold Dispenser].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 10000
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
       - label: Claim Platinum Status
         description: Show off your Sawtooth loyalty with Platinum Status.
-        source: $REF=HOLDINGS[label:Platinum Dispenser].id
+        source: $REF=ASSETS[label:Platinum Dispenser].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 1000000
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT
       - label: Get a sticker coupon!
         description: Sawtooth stickers are stylish and eco-friendly.
-        source: $REF=HOLDINGS[label:Sticker Supply].id
+        source: $REF=ASSETS[label:Sticker Supply].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 200
         rules: []
       - label: Get a blockchain coupon!
         description: Run your own blockchain. Wow your friends and neighbors.
-        source: $REF=HOLDINGS[label:Blockchain Coupons].id
+        source: $REF=ASSETS[label:Blockchain Coupons].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 500
         rules: []
       - label: Get a coupon for fork resolutions!
         description: Forks. We all have them. Get 'em resolved for free.
-        source: $REF=HOLDINGS[label:Fork Coupons].id
+        source: $REF=ASSETS[label:Fork Coupons].id
         sourceQuantity: 1
-        target: $REF=HOLDINGS[label:Sawbucket].id
+        target: $REF=ASSETS[label:Sawbucket].id
         targetQuantity: 50
         rules: []
     RENEWABLES:
       - label: Daily Loyalty Bonus!
         description: |
           Refreshed each day, get yourself 500 Sawbucks just for being here!
-        source: $REF=holdings[label:Sawbucket].id
+        source: $REF=assets[label:Sawbucket].id
         sourceQuantity: 500
         rules:
           - type: EXCHANGE_ONCE_PER_ACCOUNT

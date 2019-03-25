@@ -25,7 +25,7 @@ const layout = require('../components/layout')
 const mkt = require('../components/marketplace')
 const { acceptOffer } = require('./accept_offer_modal')
 
-const findAsset = (id, holdings) => holdings.find(h => h.id === id).asset
+const findResource = (id, assets) => assets.find(h => h.id === id).resource
 
 const acceptButton = (label, onclick, disabled = false) => {
   return m(`button.btn-lg.btn-outline-${disabled ? 'secondary' : 'primary'}`,
@@ -51,11 +51,11 @@ const OfferDetailPage = {
         } else if (offer.targetQuantity === 0) {
           vnode.state.disabled = false
         } else {
-          const quantities = acct.getAssetQuantities(user)
+          const quantities = acct.getResourceQuantities(user)
 
-          if (!quantities[offer.targetAsset]) {
+          if (!quantities[offer.targetResource]) {
             vnode.state.disabled = true
-          } else if (quantities[offer.targetAsset] < offer.targetQuantity) {
+          } else if (quantities[offer.targetResource] < offer.targetQuantity) {
             vnode.state.disabled = true
           } else {
             vnode.state.disabled = false
@@ -69,8 +69,8 @@ const OfferDetailPage = {
       .then(owner => {
         if (!owner || owner.error) return
         const offer = vnode.state.offer
-        offer.sourceAsset = findAsset(offer.source, owner.holdings)
-        offer.targetAsset = findAsset(offer.target, owner.holdings)
+        offer.sourceResource = findResource(offer.source, owner.assets)
+        offer.targetResource = findResource(offer.target, owner.assets)
         vnode.state.owner = owner
       })
       .catch(api.ignoreError)
@@ -88,10 +88,10 @@ const OfferDetailPage = {
       layout.description(offer.description),
       m('.container',
         mkt.bifold({
-          header: offer.sourceAsset,
+          header: offer.sourceResource,
           body: offer.sourceQuantity
         }, {
-          header: offer.targetAsset,
+          header: offer.targetResource,
           body: offer.targetQuantity || m('em', 'free')
         }),
         layout.row(layout.labeledField(
