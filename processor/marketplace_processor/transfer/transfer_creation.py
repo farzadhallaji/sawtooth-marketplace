@@ -30,7 +30,7 @@ def handle_transfer_asset(transfer_asset, header, state):
                                     account = header.signer_public_key)
 
 
-    # check_validity_of_transfer(transfer)
+    check_validity_of_transfer(transfer)
 """
     transfer_asset = TeansferAsset(transfer, header, state)
 
@@ -55,7 +55,7 @@ def handle_transfer_asset(transfer_asset, header, state):
     transfer_asset.handle_sender_source(transfer.amount)
     transfer_asset.handle_receiver_target(transfer.amount)
 
-
+"""
 
 def check_validity_of_transfer(transfer):
 
@@ -64,7 +64,7 @@ def check_validity_of_transfer(transfer):
             "Failed to accept Offer, Offer {} does not exist".format(
                 transfer.id))
 
-
+"""
 class TeansferAsset(object):
 
     def __init__(self, transfer, header, state):
