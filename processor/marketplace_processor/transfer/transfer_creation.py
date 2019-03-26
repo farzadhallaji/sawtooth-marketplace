@@ -5,6 +5,7 @@ from marketplace_processor.protobuf import transfer_pb2
 
 
 def handle_transfer_asset(transfer_asset, header, state):
+
     """Handle Offer acceptance.
 
     Args:
@@ -25,7 +26,8 @@ def handle_transfer_asset(transfer_asset, header, state):
             - The offerer source asset does not have the required quantity.
     """
 
-    transfer = state.get_transfer(identifier=transfer_asset.id)
+    transfer = state.get_transfer(identifier=transfer_asset.id,
+                                    account = header.signer_public_key)
 
 
     check_validity_of_transfer(transfer)
