@@ -27,6 +27,7 @@ message TransactionPayload {
         CREATE_OFFER = 5;
         ACCEPT_OFFER = 10;
         CLOSE_OFFER = 11;
+        TRANSFER_ASSET = 13; 
     }
 
     PayloadType payload_type = 1;
@@ -37,6 +38,8 @@ message TransactionPayload {
     CreateOffer create_offer = 5;
     AcceptOffer accept_offer = 10;
     CloseOffer close_offer = 11;
+
+    TransferAsset transfer_asset = 13;
 }
 
 message CreateAccount {
@@ -78,4 +81,13 @@ message AcceptOffer {
 
 message CloseOffer {
     string id = 1;
+}
+
+
+message TransferAsset {
+    string id = 1;
+    string label = 2;
+    string source = 3;
+    string target = 4;
+    uint64 amount = 5;
 }

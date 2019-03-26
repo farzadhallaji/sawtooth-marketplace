@@ -302,6 +302,65 @@ def close_offer(txn_key, batch_key, identifier):
         batch_key=batch_key)
 
 
+
+
+
+def transfer_asset(txn_key,
+                 batch_key,
+                 identifier,
+                 label,
+                 sender,
+                 amount):
+    """Create an AcceptOffer txn and wrap it in a Batch and list.
+
+    Args:
+        txn_key (sawtooth_signing.Signer): The Txn signer key pair.
+        batch_key (sawtooth_signing.Signer): The Batch signer key pair.
+        identifier (str): The identifier of the Offer.
+        sender (TransferParticipant): The participant who made the offer.
+        receiver (TransferParticipant): The participant who is accepting
+            the offer.
+        count (int): The number of units of exchange.
+
+    Returns:
+        tuple: List of Batch, signature tuple
+    """
+
+    inputs = [addresser.make_asset_address(sender.source),
+              addresser.make_asset_address(sender.target),
+              addresser.make_resource_address(sender.resource),
+              addresser.make_transfer_address(
+                  transfer_id=identifier,
+                  account=txn_key.get_public_key().as_hex())]
+
+    outputs = [addresser.make_transfer_address(
+                  transfer_id=identifier,
+                  account=txn_key.get_public_key().as_hex())]
+
+
+
+    transfer_txn = payload_pb2.TransferAsset(
+        id=identifier,
+        label=label,
+        source=sender.source,
+        target=sender.target,
+        amount=amount)
+
+    payload = payload_pb2.TransactionPayload(
+        payload_type=payload_pb2.TransactionPayload.TRANSFER_ASSET,
+        transfer_asset=transfer_txn)
+
+    return make_header_and_batch(
+        payload=payload,
+        inputs=inputs,
+        outputs=outputs,
+        txn_key=txn_key,
+        batch_key=batch_key)
+
+
+
+
+
 class OfferParticipant(object):
 
     def __init__(self, source, target, source_resource, target_resource):
@@ -337,6 +396,43 @@ class OfferParticipant(object):
         return self._target_resource
 
 
+class TransferParticipant(object):
+
+    def __init__(self, source, target, resource, amount):
+        """Constructor
+
+        Args:
+            source (str): The id of the source Asset.
+            target (str): The id of the target Asset.
+            source_resource (str): The id of the source Resource.
+            target_resource (str): The id of the target Resource.
+            amount (float): The amount of the Transfering Resource.
+        """
+
+        self._source = source
+        self._target = target
+        self._resource = resource
+
+        self._amount = amount
+
+    @property
+    def source(self):
+        return self._source
+
+    
+    @property
+    def target(self):
+        return self._target
+
+    @property
+    def resource(self):
+        return self._resource
+
+    @property
+    def amount(self):
+        return self._amount
+
+
 class MarketplaceAsset(object):
 
     def __init__(self, asset_id, quantity, resource):
@@ -355,3 +451,6 @@ class MarketplaceAsset(object):
     @property
     def resource(self):
         return self._resource
+
+
+

@@ -17,7 +17,7 @@ import enum
 import hashlib
 
 
-FAMILY_NAME = 'marketplace'
+FAMILY_NAME = 'noay_marketplace'
 
 
 NS = hashlib.sha512(FAMILY_NAME.encode()).hexdigest()[:6]
@@ -35,15 +35,19 @@ class ResourceSpace(enum.IntEnum):
 
 class AssetSpace(enum.IntEnum):
     START = 50
-    STOP = 125
+    STOP = 100
 
 
 class AccountSpace(enum.IntEnum):
-    START = 125
-    STOP = 200
+    START = 100
+    STOP = 150
 
 
 class OfferSpace(enum.IntEnum):
+    START = 150
+    STOP = 200
+
+class TransferSpace(enum.IntEnum):
     START = 200
     STOP = 256
 
@@ -56,7 +60,12 @@ class AddressSpace(enum.IntEnum):
     OFFER = 3
     OFFER_HISTORY = 4
 
+    TRANSFER = 5
+
+
     OTHER_FAMILY = 100
+
+
 
 
 def _hash(identifier):
@@ -116,6 +125,16 @@ def make_offer_address(offer_id):
         OfferSpace.STOP) + full_hash[:62]
 
 
+def make_transfer_address(transfer_id, account):
+    full_hash = _hash(transfer_id)
+    account_hash = _hash(account)
+
+    return NS + _compress(
+        full_hash,
+        TransferSpace.START,
+        TransferSpace.STOP) + full_hash[:60] + _compress(account_hash, 1, 256)
+
+
 def _contains(num, space):
     return space.START <= num < space.STOP
 
@@ -141,6 +160,10 @@ def address_is(address):
 
     elif _contains(infix, OfferSpace):
         result = AddressSpace.OFFER
+
+    elif _contains(infix, TransferSpace):
+        result = AddressSpace.TRANSFER
+
     else:
         result = AddressSpace.OTHER_FAMILY
 
