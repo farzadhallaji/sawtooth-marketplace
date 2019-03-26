@@ -29,36 +29,36 @@ TRANSFER_BP = Blueprint('transfer')
 
 
 @TRANSFER_BP.post('transfer')
-# @authorized()
+@authorized()
 async def transfer_asset(request):
     """Creates a new Asset for the authorized Account"""
     
-    # required_fields = ['label', 'source', 'target' , 'amount' ,'resource' ]
-    # common.validate_fields(required_fields, request.json)
+    required_fields = ['label', 'source', 'target' , 'amount' ,'resource' ]
+    common.validate_fields(required_fields, request.json)
 
-    # transfer = _create_transfer_dict(request)
-    # sender = _create_transfer_participant(request.json, transfer)
-    # signer = await common.get_signer(request)
+    transfer = _create_transfer_dict(request)
+    sender = _create_transfer_participant(request.json, transfer)
+    signer = await common.get_signer(request)
 
-    # batches, batch_id = transaction_creation.transfer_asset(
-    #     txn_key = signer,
-    #     batch_key = request.app.config.SIGNER,
-    #     identifier = transfer['id'],
-    #     label = transfer.get('label'),
-    #     sender = sender,
-    #     amount = transfer['amount'])
+    batches, batch_id = transaction_creation.transfer_asset(
+        txn_key = signer,
+        batch_key = request.app.config.SIGNER,
+        identifier = transfer['id'],
+        label = transfer.get('label'),
+        sender = sender,
+        amount = transfer['amount'])
 
-    # print("AAAAAAAAAAAAAAAA 80")
-    # await messaging.send(
-    #     request.app.config.VAL_CONN,
-    #     request.app.config.TIMEOUT,
-    #     batches)
-    # print("AAAAAAAAAAAAAAAA 85")
+    print("AAAAAAAAAAAAAAAA 80")
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        batches)
+    print("AAAAAAAAAAAAAAAA 85")
 
-    # await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
-    # print("AAAAAAAAAAAAAAAA 88")
+    await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
+    print("AAAAAAAAAAAAAAAA 88")
 
-    return response.json({'transfer' : 'asad'})
+    return response.json(transfer)
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
