@@ -86,7 +86,7 @@ async def transfer_asset(request):
     # await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
     # print("AAAAAAAAAAAAAAAA 88")
 
-    return response.json("{'asad' : 'adas'}")
+    return response.json({'my': 'blueprint'})
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
