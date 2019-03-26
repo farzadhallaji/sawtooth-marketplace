@@ -176,6 +176,8 @@ def main():
     app.blueprint(ERRORS_BP)
     app.blueprint(ASSETS_BP)
     app.blueprint(OFFERS_BP)
+    app.blueprint(TRANSFER_BP)
+    
 
     load_config(app)
     zmq = ZMQEventLoop()

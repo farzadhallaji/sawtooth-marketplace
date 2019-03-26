@@ -25,36 +25,8 @@ from api.authorization import authorized
 from marketplace_transaction import transaction_creation
 
 
-ASSETS_BP = Blueprint('assets')
+TRANSFER_BP = Blueprint('transfer')
 
-
-@ASSETS_BP.post('assets')
-@authorized()
-async def create_asset(request):
-    """Creates a new Asset for the authorized Account"""
-    required_fields = ['resource']
-    common.validate_fields(required_fields, request.json)
-
-    asset = _create_asset_dict(request)
-    signer = await common.get_signer(request)
-
-    batches, batch_id = transaction_creation.create_asset(
-        txn_key=signer,
-        batch_key=request.app.config.SIGNER,
-        identifier=asset['id'],
-        label=asset.get('label'),
-        description=asset.get('description'),
-        resource=asset['resource'],
-        quantity=asset['quantity'])
-
-    await messaging.send(
-        request.app.config.VAL_CONN,
-        request.app.config.TIMEOUT,
-        batches)
-
-    await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
-
-    return response.json(asset)
 
 @ASSETS_BP.post('transfer')
 # @authorized()
