@@ -30,7 +30,7 @@ def handle_transfer_asset(transfer_asset, header, state):
                                     account = header.signer_public_key)
 
 
-    check_validity_of_transfer(transfer)
+    # check_validity_of_transfer(transfer)
 """
     transfer_asset = TeansferAsset(transfer, header, state)
 
