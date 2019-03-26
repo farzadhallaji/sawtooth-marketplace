@@ -119,11 +119,11 @@ class TeansferAsset(object):
     def handle_sender_source(self, input_quantity):
         
         self._state.change_asset_quantity(
-            self._offerer.source.id,
-            self._offerer.source.quantity - input_quantity)
+            self._sender_asset.id,
+            self._sender_asset.quantity - input_quantity)
 
     def handle_receiver_target(self, input_quantity):
         self._state.change_asset_quantity(
-            self._receiver.target.id,
-            self._receiver.target.quantity + input_quantity)
+            self._receiver_asset.id,
+            self._receiver_asset.quantity + input_quantity)
 
