@@ -52,8 +52,8 @@ def handle_transfer_asset(transfer_asset, header, state):
 
 
     # Handle incrementing and decrementing the Assets' quantity
-    transfer_asset.handle_sender_source(transfer.amount)
-    transfer_asset.handle_receiver_target(transfer.amount)
+    # transfer_asset.handle_sender_source(transfer.amount)
+    # transfer_asset.handle_receiver_target(transfer.amount)
 
 
 
