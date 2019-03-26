@@ -40,6 +40,9 @@ async def transfer_asset(request):
     sender = _create_transfer_participant(request.json, transfer)
     signer = await common.get_signer(request)
 
+    print("transfer =======> ", transfer)
+    print("sender =========> ", sender)
+
     batches, batch_id = transaction_creation.transfer_asset(
         txn_key = signer,
         batch_key = request.app.config.SIGNER,
@@ -48,15 +51,12 @@ async def transfer_asset(request):
         sender = sender,
         amount = transfer['amount'])
 
-    print("AAAAAAAAAAAAAAAA 80")
     await messaging.send(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
         batches)
-    print("AAAAAAAAAAAAAAAA 85")
 
     await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
-    print("AAAAAAAAAAAAAAAA 88")
 
     return response.json(transfer)
 

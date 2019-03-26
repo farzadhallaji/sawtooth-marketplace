@@ -34,6 +34,8 @@ def handle_transfer_asset(transfer_asset, header, state):
 
     transfer_asset = TeansferAsset(transfer, header, state)
 
+    print("transfer_asset 37 ==================================> " , transfer_asset)
+
     # The asset ids referernce Assets.
     transfer_asset.validate_output_asset_exists()
 
@@ -79,6 +81,9 @@ class TeansferAsset(object):
 
         self._sender_asset = source_hldng
         self._receiver_asset = target_hldng
+
+        print("self._sender_asset ===========> 85 ", self._sender_asset)
+        print("self._receiver_asset ===========> 85 ", self._receiver_asset)
 
 
     def validate_output_asset_exists(self):
