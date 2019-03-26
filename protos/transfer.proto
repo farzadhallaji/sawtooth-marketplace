@@ -15,8 +15,6 @@
 
 syntax = "proto3";
 
-import "rule.proto";
-
 message Transfer {
 
     string id = 1;

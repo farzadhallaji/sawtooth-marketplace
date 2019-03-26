@@ -18,6 +18,7 @@ from marketplace_processor.protobuf import account_pb2
 from marketplace_processor.protobuf import resource_pb2
 from marketplace_processor.protobuf import asset_pb2
 from marketplace_processor.protobuf import offer_pb2
+from marketplace_processor.protobuf import transfer_pb2
 from marketplace_processor.protobuf import offer_history_pb2
 from marketplace_processor.protobuf import rule_pb2
 
@@ -33,6 +34,26 @@ class MarketplaceState(object):
         self._context = context
         self._timeout = timeout
         self._state_entries = []
+
+    def get_transfer(self, identifier):
+        address = addresser.make_transfer_address(offer_id=identifier)
+        self._state_entries.extend(self._context.get_state(
+            addresses=[address],
+            timeout=self._timeout))
+
+        return self._get_transfer(address=address, identifier=identifier)
+
+    def _get_transfer(self, address, identifier):
+
+        container = _get_transfer_container(self._state_entries, address)
+        offer = None
+        try:
+            offer = _get_offer_from_container(container, identifier)
+        except KeyError:
+            # We are fine with returning None
+            pass
+
+        return offer
 
     def get_offer(self, identifier):
         address = addresser.make_offer_address(offer_id=identifier)
@@ -389,6 +410,23 @@ def _get_history_from_container(container, offer_id, account):
             return offer_history
     raise KeyError("OfferHistory not found in container.")
 
+
+def _get_transfer_container(state_entries, address):
+    try:
+        entry = _find_in_state(state_entries, address)
+        container = transfer_pb2.TransferContainer()
+        container.ParseFromString(entry.data)
+    except KeyError:
+        container = transfer_pb2.TransferContainer()
+
+    return container
+
+def _get_transfer_from_container(container, transfer_id):
+    for transfer in container.entries:
+        if transfer.id == transfer_id:
+            return transfer
+    raise KeyError(
+        "Transfer with id {} is not in container".format(transfer_id))
 
 def _get_offer_container(state_entries, address):
     try:
