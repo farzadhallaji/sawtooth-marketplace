@@ -24,6 +24,7 @@ from marketplace_processor.asset import asset_creation
 from marketplace_processor.offer import offer_acceptance
 from marketplace_processor.offer import offer_closure
 from marketplace_processor.offer import offer_creation
+from marketplace_processor.transfer import transfer_creation
 from marketplace_processor.marketplace_payload import MarketplacePayload
 from marketplace_processor.marketplace_state import MarketplaceState
 
@@ -75,6 +76,11 @@ class MarketplaceHandler(TransactionHandler):
         elif payload.is_close_offer():
             offer_closure.handle_close_offer(
                 payload.close_offer(),
+                header=transaction.header,
+                state=state)
+        elif payload.is_transfer_asset():
+            transfer_creation.handle_transfer_asset(
+                payload.transfer_asset(),
                 header=transaction.header,
                 state=state)
 

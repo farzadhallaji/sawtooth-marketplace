@@ -18,6 +18,7 @@ from marketplace_processor.protobuf import account_pb2
 from marketplace_processor.protobuf import resource_pb2
 from marketplace_processor.protobuf import asset_pb2
 from marketplace_processor.protobuf import offer_pb2
+from marketplace_processor.protobuf import tansfer_pb2
 from marketplace_processor.protobuf import offer_history_pb2
 from marketplace_processor.protobuf import rule_pb2
 

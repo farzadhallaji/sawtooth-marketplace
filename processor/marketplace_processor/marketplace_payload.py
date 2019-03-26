@@ -111,3 +111,19 @@ class MarketplacePayload(object):
         close_offer = payload_pb2.TransactionPayload.CLOSE_OFFER
 
         return self._transaction.payload_type == close_offer
+
+
+    def transfer_asset(self):
+        """Returns the value set in transfer_asset.
+
+        Returns:
+            payload_pb2.AcceptOffer
+        """
+
+        return self._transaction.transfer_asset
+
+    def is_transfer_asset(self):
+
+        transfer_asset = payload_pb2.TransactionPayload.TRANSFER_ASSET
+
+        return self._transaction.payload_type == transfer_asset
