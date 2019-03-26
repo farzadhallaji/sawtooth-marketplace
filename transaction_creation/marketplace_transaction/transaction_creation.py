@@ -333,7 +333,10 @@ def transfer_asset(txn_key,
                   transfer_id=identifier,
                   account=txn_key.get_public_key().as_hex())]
 
-    outputs = [addresser.make_transfer_address(
+    outputs = [addresser.make_asset_address(sender.source),
+              addresser.make_asset_address(sender.target),
+              addresser.make_resource_address(sender.resource),
+              addresser.make_transfer_address(
                   transfer_id=identifier,
                   account=txn_key.get_public_key().as_hex())]
 
@@ -412,7 +415,6 @@ class TransferParticipant(object):
         self._source = source
         self._target = target
         self._resource = resource
-
         self._amount = amount
 
     @property

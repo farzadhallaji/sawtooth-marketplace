@@ -35,8 +35,8 @@ class MarketplaceState(object):
         self._timeout = timeout
         self._state_entries = []
 
-    def get_transfer(self, identifier):
-        address = addresser.make_transfer_address(transfer_id=identifier)
+    def get_transfer(self, identifier , account):
+        address = addresser.make_transfer_address(transfer_id=identifier, account = account)
         self._state_entries.extend(self._context.get_state(
             addresses=[address],
             timeout=self._timeout))
