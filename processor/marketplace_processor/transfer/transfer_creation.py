@@ -77,7 +77,7 @@ class TeansferAsset(object):
 
         resource = state.get_resource(target_hldng.resource)
 
-        self._sender_asset = _source_hldng
+        self._sender_asset = source_hldng
         self._receiver_asset = target_hldng
 
 
