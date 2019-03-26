@@ -51,14 +51,14 @@ async def transfer_asset(request):
         sender = sender,
         amount = transfer['amount'])
 
-    print("batches =========> ", batches)
+    # print("batches =========> ", batches)
 
-    # await messaging.send(
-    #     request.app.config.VAL_CONN,
-    #     request.app.config.TIMEOUT,
-    #     batches)
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        batches)
 
-    # await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
+    await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
 
     return response.json({"transfer" : "asad"})
 
