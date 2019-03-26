@@ -37,23 +37,27 @@ class MarketplaceState(object):
 
     def get_transfer(self, identifier , account):
         address = addresser.make_transfer_address(transfer_id=identifier, account = account)
+        print("address ========= state ===========> " , address)
+
         self._state_entries.extend(self._context.get_state(
             addresses=[address],
-            timeout=self._timeout))
+            timeout=self._timeout))       
+        
+        print("self._get_transfer ========= state ===========> " , self._get_transfer(address=address, identifier=identifier))
 
         return self._get_transfer(address=address, identifier=identifier)
 
     def _get_transfer(self, address, identifier):
 
         container = _get_transfer_container(self._state_entries, address)
-        offer = None
+        transfer = None
         try:
-            offer = _get_offer_from_container(container, identifier)
+            transfer = _get_transfer_from_container(container, identifier)
         except KeyError:
             # We are fine with returning None
             pass
 
-        return offer
+        return transfer
 
     def get_offer(self, identifier):
         address = addresser.make_offer_address(offer_id=identifier)

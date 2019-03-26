@@ -31,7 +31,7 @@ def handle_transfer_asset(transfer_asset, header, state):
     print("transfer =======> ",transfer)
 
     # check_validity_of_transfer(transfer)
-"""
+
     transfer_asset = TeansferAsset(transfer, header, state)
 
     print("transfer_asset 37 ==================================> " , transfer_asset)
@@ -131,5 +131,3 @@ class TeansferAsset(object):
         self._state.change_asset_quantity(
             self._receiver_asset,
             self._receiver_asset.quantity + input_quantity)
-
-"""
