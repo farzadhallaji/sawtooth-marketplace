@@ -43,22 +43,22 @@ async def transfer_asset(request):
     print("transfer =======> ", transfer)
     print("sender =========> ", sender)
 
-    batches, batch_id = transaction_creation.transfer_asset(
-        txn_key = signer,
-        batch_key = request.app.config.SIGNER,
-        identifier = transfer['id'],
-        label = transfer.get('label'),
-        sender = sender,
-        amount = transfer['amount'])
+    # batches, batch_id = transaction_creation.transfer_asset(
+    #     txn_key = signer,
+    #     batch_key = request.app.config.SIGNER,
+    #     identifier = transfer['id'],
+    #     label = transfer.get('label'),
+    #     sender = sender,
+    #     amount = transfer['amount'])
 
-    await messaging.send(
-        request.app.config.VAL_CONN,
-        request.app.config.TIMEOUT,
-        batches)
+    # await messaging.send(
+    #     request.app.config.VAL_CONN,
+    #     request.app.config.TIMEOUT,
+    #     batches)
 
-    await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
+    # await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
 
-    return response.json(transfer)
+    return response.json({"transfer" : "asad"})
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
