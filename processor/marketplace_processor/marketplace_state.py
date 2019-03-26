@@ -43,6 +43,7 @@ class MarketplaceState(object):
             addresses=[address],
             timeout=self._timeout))       
         
+        print("_context.get_state ========= state ===========> " , self._context.get_state(addresses=[address],timeout=self._timeout))
         print("self._get_transfer ========= state ===========> " , self._get_transfer(address=address, identifier=identifier))
 
         return self._get_transfer(address=address, identifier=identifier)
