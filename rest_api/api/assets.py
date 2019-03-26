@@ -77,14 +77,17 @@ async def transfer_asset(request):
         sender = sender,
         amount = transfer['amount'])
 
+    print("AAAAAAAAAAAAAAAA 80")
     await messaging.send(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
         batches)
+    print("AAAAAAAAAAAAAAAA 85")
 
     await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
+    print("AAAAAAAAAAAAAAAA 88")
 
-    return response.json(asset)
+    return response.json(transfer)
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
