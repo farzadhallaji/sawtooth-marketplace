@@ -56,7 +56,7 @@ async def create_asset(request):
 
     return response.json(asset)
 
-@ASSETS_BP.post('assets/transfer')
+@ASSETS_BP.post('transfer')
 @authorized()
 async def transfer_asset(request):
     """Creates a new Asset for the authorized Account"""
