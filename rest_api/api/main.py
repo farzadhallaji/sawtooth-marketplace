@@ -39,7 +39,7 @@ from api.authorization import AUTH_BP
 from api.errors import ERRORS_BP
 from api.assets import ASSETS_BP
 from api.offers import OFFERS_BP
-from api.transfer import OFFERS_BP
+from api.transfer import TRANSFER_BP
 
 
 LOGGER = logging.getLogger(__name__)

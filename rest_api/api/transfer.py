@@ -28,7 +28,7 @@ from marketplace_transaction import transaction_creation
 TRANSFER_BP = Blueprint('transfer')
 
 
-@ASSETS_BP.post('transfer')
+@TRANSFER_BP.post('transfer')
 # @authorized()
 async def transfer_asset(request):
     """Creates a new Asset for the authorized Account"""
