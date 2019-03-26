@@ -39,6 +39,7 @@ from api.authorization import AUTH_BP
 from api.errors import ERRORS_BP
 from api.assets import ASSETS_BP
 from api.offers import OFFERS_BP
+from api.transfer import OFFERS_BP
 
 
 LOGGER = logging.getLogger(__name__)
@@ -177,7 +178,7 @@ def main():
     app.blueprint(ASSETS_BP)
     app.blueprint(OFFERS_BP)
     app.blueprint(TRANSFER_BP)
-    
+
 
     load_config(app)
     zmq = ZMQEventLoop()
