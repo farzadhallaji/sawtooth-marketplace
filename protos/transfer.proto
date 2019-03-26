@@ -23,7 +23,8 @@ message Transfer {
     string label = 2;
     string source = 3;
     string target = 4;
-    sint64 amount = 5;
+    string resource = 5;
+    sint64 amount = 6;
 }
 
 message TransferContainer {

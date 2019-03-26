@@ -56,6 +56,35 @@ async def create_asset(request):
 
     return response.json(asset)
 
+@ASSETS_BP.post('assets/transfer')
+@authorized()
+async def transfer_asset(request):
+    """Creates a new Asset for the authorized Account"""
+    
+    required_fields = ['label', 'source', 'target' , 'amount' ,'resource' ]
+    common.validate_fields(required_fields, request.json)
+
+    # asset = _create_asset_dict(request)
+    transfer = _create_transfer_dict(request)
+    sender = _create_transfer_participant(request.json, transfer)
+    signer = await common.get_signer(request)
+
+    batches, batch_id = transaction_creation.transfer_asset(
+        txn_key = signer,
+        batch_key = request.app.config.SIGNER,
+        identifier = transfer['id'],
+        label = transfer.get('label'),
+        sender = sender,
+        amount = transfer['amount'])
+
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        batches)
+
+    await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
+
+    return response.json(asset)
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
@@ -69,3 +98,26 @@ def _create_asset_dict(request):
     asset['id'] = str(uuid4())
 
     return asset
+
+def _create_transfer_dict(request):
+    keys = ['label', 'source', 'target' , 'amount' ,'resource' ]
+    body = request.json
+
+    transfer = {k: body[k] for k in keys if body.get(k) is not None}
+
+    if transfer.get('amount') is None:
+        transfer['amount'] = 0
+
+    transfer['id'] = str(uuid4())
+
+    return transfer
+
+def _create_transfer_participant(body, transfer):
+
+    sender = transaction_creation.TransferParticipant(
+        source = transfer['source'] ,
+        target = transfer['target'],
+        resource = transfer['resource'] ,
+        amount = transfer['amount'] )
+        
+    return sender
