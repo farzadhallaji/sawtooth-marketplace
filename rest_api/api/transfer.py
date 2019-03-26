@@ -62,19 +62,7 @@ async def transfer_asset(request):
 
     return response.json({"transfer" : "asad"})
 
-def _create_asset_dict(request):
-    keys = ['label', 'description', 'resource', 'quantity']
-    body = request.json
-
-    asset = {k: body[k] for k in keys if body.get(k) is not None}
-
-    if asset.get('quantity') is None:
-        asset['quantity'] = 0
-
-    asset['id'] = str(uuid4())
-
-    return asset
-
+    
 def _create_transfer_dict(request):
     keys = ['label', 'source', 'target' , 'amount' ,'resource' ]
     body = request.json

@@ -25,13 +25,13 @@ def handle_transfer_asset(transfer_asset, header, state):
             - The receiver source asset does not have the required quantity.
             - The offerer source asset does not have the required quantity.
     """
-    # print("transfer_asset =======> ",transfer_asset.id)
+    print("transfer_asset =======> ",transfer_asset.id)
     transfer = state.get_transfer(identifier=transfer_asset.id,
                                     account = header.signer_public_key)
 
 
     check_validity_of_transfer(transfer)
-
+"""
     transfer_asset = TeansferAsset(transfer, header, state)
 
     print("transfer_asset 37 ==================================> " , transfer_asset)
@@ -132,3 +132,4 @@ class TeansferAsset(object):
             self._receiver_asset,
             self._receiver_asset.quantity + input_quantity)
 
+"""
