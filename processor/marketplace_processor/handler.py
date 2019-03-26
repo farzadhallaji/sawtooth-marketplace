@@ -79,6 +79,7 @@ class MarketplaceHandler(TransactionHandler):
                 header=transaction.header,
                 state=state)
         elif payload.is_transfer_asset():
+            print("payload.transfer_asset() ==============> " , payload.transfer_asset())
             transfer_creation.handle_transfer_asset(
                 payload.transfer_asset(),
                 header=transaction.header,

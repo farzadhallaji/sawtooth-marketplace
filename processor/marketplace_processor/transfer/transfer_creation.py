@@ -25,7 +25,7 @@ def handle_transfer_asset(transfer_asset, header, state):
             - The receiver source asset does not have the required quantity.
             - The offerer source asset does not have the required quantity.
     """
-    print("transfer_asset =======> ",transfer_asset)
+    # print("transfer_asset =======> ",transfer_asset.id)
     transfer = state.get_transfer(identifier=transfer_asset.id,
                                     account = header.signer_public_key)
 
