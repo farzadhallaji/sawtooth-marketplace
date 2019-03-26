@@ -52,8 +52,8 @@ def handle_transfer_asset(transfer_asset, header, state):
 
 
     # Handle incrementing and decrementing the Assets' quantity
-    # transfer_asset.handle_sender_source(transfer.amount)
-    # transfer_asset.handle_receiver_target(transfer.amount)
+    transfer_asset.handle_sender_source(transfer.amount)
+    transfer_asset.handle_receiver_target(transfer.amount)
 
 
 
@@ -124,11 +124,11 @@ class TeansferAsset(object):
     def handle_sender_source(self, input_quantity):
         
         self._state.change_asset_quantity(
-            self._sender_asset.id,
+            self._sender_asset,
             self._sender_asset.quantity - input_quantity)
 
     def handle_receiver_target(self, input_quantity):
         self._state.change_asset_quantity(
-            self._receiver_asset.id,
+            self._receiver_asset,
             self._receiver_asset.quantity + input_quantity)
 
