@@ -57,17 +57,16 @@ async def create_asset(request):
     return response.json(asset)
 
 @ASSETS_BP.post('transfer')
-@authorized()
+# @authorized()
 async def transfer_asset(request):
     """Creates a new Asset for the authorized Account"""
     
     required_fields = ['label', 'source', 'target' , 'amount' ,'resource' ]
     common.validate_fields(required_fields, request.json)
 
-    # asset = _create_asset_dict(request)
-    transfer = _create_transfer_dict(request)
-    sender = _create_transfer_participant(request.json, transfer)
-    signer = await common.get_signer(request)
+    # transfer = _create_transfer_dict(request)
+    # sender = _create_transfer_participant(request.json, transfer)
+    # signer = await common.get_signer(request)
 
     # batches, batch_id = transaction_creation.transfer_asset(
     #     txn_key = signer,
@@ -87,7 +86,7 @@ async def transfer_asset(request):
     # await messaging.check_batch_status(request.app.config.VAL_CONN, batch_id)
     # print("AAAAAAAAAAAAAAAA 88")
 
-    return response.json(transfer)
+    return response.json("{'asad' : 'adas'}")
 
 def _create_asset_dict(request):
     keys = ['label', 'description', 'resource', 'quantity']
